@@ -1,0 +1,382 @@
+{
+  "sections": {
+    "Tires": {
+      "parts": {
+        "Front Compound": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race",
+            "Rally",
+            "Drift"
+          ]
+        },
+        "Rear Compound": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race",
+            "Rally",
+            "Drift"
+          ]
+        },
+        "Front Track Width": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Widest"
+          ]
+        },
+        "Rear Track Width": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Widest"
+          ]
+        }
+      }
+    },
+    "Rims": {
+      "parts": {
+        "Front Rims Style": {
+          "control": "dropdown",
+          "options": [
+            "Stock",
+            "Sport",
+            "Racing",
+            "Offroad",
+            "Drag"
+          ],
+          "hint": "Select rim style"
+        },
+        "Rear Rims Style": {
+          "control": "dropdown",
+          "options": [
+            "Stock",
+            "Sport",
+            "Racing",
+            "Offroad",
+            "Drag"
+          ],
+          "hint": "Select rim style"
+        }
+      }
+    },
+    "Aero": {
+      "parts": {
+        "Front Bumper": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Rear Wing": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Side Skirts": {
+          "control": "button",
+          "options": [
+            "None",
+            "Stock",
+            "Street",
+            "Sport"
+          ]
+        }
+      }
+    },
+    "Engine": {
+      "parts": {
+        "Intake": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Fuel System": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Ignition": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Exhaust": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Camshaft": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Valves": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Displacement": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Pistons": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Turbo": {
+          "control": "button",
+          "options": [
+            "None",
+            "Street",
+            "Sport",
+            "Race",
+            "Rally"
+          ]
+        },
+        "Twin Turbo": {
+          "control": "button",
+          "options": [
+            "None",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Supercharger": {
+          "control": "button",
+          "options": [
+            "None",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Centrifugal Supercharger": {
+          "control": "button",
+          "options": [
+            "None",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Intercooler": {
+          "control": "button",
+          "options": [
+            "None",
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Oil Cooling": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Flywheel": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        }
+      }
+    },
+    "Platform": {
+      "parts": {
+        "Brakes": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Springs": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race",
+            "Rally",
+            "Drift"
+          ]
+        },
+        "Front ARB": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Rear ARB": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Chassis Reinforcement": {
+          "control": "button",
+          "options": [
+            "None",
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Weight Reduction": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        }
+      }
+    },
+    "Drivetrain": {
+      "parts": {
+        "Clutch": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Transmission": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Driveline": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Differential": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        }
+      }
+    },
+    "Tuning": {
+      "parts": {
+        "Final Drive": {
+          "control": "text",
+          "default": "3.50",
+          "hint": "Enter final drive ratio (2.0-5.0)"
+        },
+        "Gear 1 Ratio": {
+          "control": "text",
+          "default": "2.80",
+          "hint": "Enter gear 1 ratio"
+        },
+        "Gear 2 Ratio": {
+          "control": "text",
+          "default": "1.95",
+          "hint": "Enter gear 2 ratio"
+        },
+        "Gear 3 Ratio": {
+          "control": "text",
+          "default": "1.45",
+          "hint": "Enter gear 3 ratio"
+        },
+        "Gear 4 Ratio": {
+          "control": "text",
+          "default": "1.15",
+          "hint": "Enter gear 4 ratio"
+        },
+        "Gear 5 Ratio": {
+          "control": "text",
+          "default": "0.95",
+          "hint": "Enter gear 5 ratio"
+        },
+        "Gear 6 Ratio": {
+          "control": "text",
+          "default": "0.80",
+          "hint": "Enter gear 6 ratio"
+        }
+      }
+    }
+  }
+}

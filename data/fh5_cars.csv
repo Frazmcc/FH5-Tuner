@@ -1,0 +1,33 @@
+manufacturer,model,year,pi,drivetrain,power_hp,weight_lbs,engine_type,aspiration,displacement_l
+Nissan,GT-R (R35),2017,800,AWD,565,3865,V6,Twin Turbo,3.8
+Porsche,911 GT3 RS,2019,898,RWD,520,3153,Flat-6,Naturally Aspirated,4.0
+McLaren,720S,2018,920,RWD,710,3128,V8,Twin Turbo,4.0
+Ford,Mustang GT,2018,680,RWD,460,3705,V8,Naturally Aspirated,5.0
+Chevrolet,Corvette Stingray,2020,743,RWD,495,3366,V8,Naturally Aspirated,6.2
+BMW,M3 Competition,2021,783,RWD,503,3890,I6,Twin Turbo,3.0
+Mercedes-AMG,GT R,2017,817,RWD,577,3627,V8,Twin Turbo,4.0
+Audi,R8 V10 Plus,2016,868,AWD,602,3516,V10,Naturally Aspirated,5.2
+Lamborghini,Huracán Performante,2018,920,AWD,640,3047,V10,Naturally Aspirated,5.2
+Ferrari,488 GTB,2016,900,RWD,661,3252,V8,Twin Turbo,3.9
+Toyota,Supra GR,2020,723,RWD,335,3397,I6,Twin Turbo,3.0
+Honda,Civic Type R,2018,655,FWD,306,3117,I4,Turbo,2.0
+Subaru,WRX STI,2015,650,AWD,305,3386,Flat-4,Turbo,2.5
+Mazda,MX-5 Miata,2016,540,RWD,155,2332,I4,Naturally Aspirated,2.0
+Dodge,Challenger SRT Hellcat,2018,761,RWD,707,4449,V8,Supercharged,6.2
+Jeep,Wrangler Rubicon,2018,560,4WD,285,4129,V6,Naturally Aspirated,3.6
+Ford,F-150 Raptor,2017,605,4WD,450,5525,V6,Twin Turbo,3.5
+Volkswagen,Golf R,2014,620,AWD,292,3284,I4,Turbo,2.0
+Mitsubishi,Lancer Evolution X,2008,625,AWD,291,3483,I4,Turbo,2.0
+Aston Martin,Vantage,2019,818,RWD,503,3373,V8,Twin Turbo,4.0
+Jaguar,F-Type R,2015,805,AWD,550,3814,V8,Supercharged,5.0
+Lexus,RC F,2015,720,RWD,467,3958,V8,Naturally Aspirated,5.0
+Alfa Romeo,Giulia Quadrifoglio,2017,735,RWD,505,3858,V6,Twin Turbo,2.9
+Lotus,Evora GT,2020,763,RWD,416,3175,V6,Supercharged,3.5
+Acura,NSX,2017,862,AWD,573,3803,V6,Twin Turbo,3.5
+Bugatti,Chiron,2018,999,AWD,1479,4398,W16,Quad Turbo,8.0
+Koenigsegg,Jesko,2020,999,RWD,1280,3130,V8,Twin Turbo,5.0
+Pagani,Huayra BC,2017,962,RWD,791,2755,V12,Twin Turbo,6.0
+Ford,GT,2017,932,RWD,647,3054,V6,Twin Turbo,3.5
+Porsche,Taycan Turbo S,2020,874,AWD,750,5132,Electric,Electric,0.0
+Tesla,Model S Plaid,2021,845,AWD,1020,4766,Electric,Electric,0.0
+Rimac,Nevera,2021,999,AWD,1914,4740,Electric,Electric,0.0
