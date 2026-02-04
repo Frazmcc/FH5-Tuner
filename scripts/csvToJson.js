@@ -1,17 +1,15 @@
-// Usage: node scripts/csvToJson.js data/fh5_cars.csv data/schema/fh5_cars.json
-// Places: run from repository root
+// Usage: node scripts/csvToJson.cjs data/fh5_cars.csv data/schema/fh5_cars.json
+// Run from repository root
 const fs = require('fs');
 const path = require('path');
 
 function guessNumber(value) {
   if (value === '') return null;
-  // If value contains only digits or digits with decimal point, parse
   const num = Number(value);
   return Number.isFinite(num) ? num : value;
 }
 
 function parseCSV(content) {
-  // Basic CSV parser that respects quoted fields and commas
   const rows = [];
   let i = 0;
   let cur = '';
@@ -40,7 +38,6 @@ function parseCSV(content) {
     }
 
     if ((ch === '\n' || ch === '\r') && !inQuotes) {
-      // handle CRLF
       if (ch === '\r' && content[i+1] === '\n') {
         i++;
       }
@@ -56,7 +53,6 @@ function parseCSV(content) {
     i++;
   }
 
-  // final
   if (cur !== '' || row.length > 0) {
     row.push(cur);
     rows.push(row);
@@ -68,7 +64,6 @@ function parseCSV(content) {
 function toTypedValue(key, raw) {
   if (raw === '') return null;
 
-  // Common numeric column names (case-insensitive)
   const numericKeys = [
     'year','price','pi','power','power_hp','power_kw','weight','weight_lbs',
     'engine_size','displacement','displacement_l','torque','gears',
@@ -77,7 +72,6 @@ function toTypedValue(key, raw) {
   ];
 
   const lower = key.toLowerCase();
-  // Accept numeric if key contains any of these tokens
   for (const token of numericKeys) {
     if (lower.includes(token)) {
       const num = Number(raw);
@@ -85,10 +79,8 @@ function toTypedValue(key, raw) {
     }
   }
 
-  // Also handle clearly numeric-looking values
   if (/^-?\d+(\.\d+)?$/.test(raw)) return Number(raw);
 
-  // else keep string
   return raw;
 }
 
@@ -105,31 +97,27 @@ function csvToJson(csvPath, outPath) {
 
   for (let r = 1; r < rows.length; r++) {
     const row = rows[r];
-    // skip blank line rows
     if (row.every(cell => cell === '')) continue;
 
     const obj = {};
     for (let c = 0; c < headers.length; c++) {
       const key = headers[c] || `col_${c}`;
       const raw = (c < row.length) ? row[c] : '';
-      // Trim strings unless numeric (preserve leading/trailing for strings is rarely needed)
       const trimmed = raw === '' ? '' : raw.trim();
       obj[key] = toTypedValue(key, trimmed);
     }
     objects.push(obj);
   }
 
-  // Ensure output directory exists
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, JSON.stringify(objects, null, 2), 'utf8');
   console.log(`Converted ${csvPath} → ${outPath} (${objects.length} entries)`);
 }
 
-// CLI
 if (require.main === module) {
   const argv = process.argv.slice(2);
   if (argv.length < 2) {
-    console.error('Usage: node scripts/csvToJson.js <in.csv> <out.json>');
+    console.error('Usage: node scripts/csvToJson.cjs <in.csv> <out.json>');
     process.exit(2);
   }
   const [inPath, outPath] = argv;
