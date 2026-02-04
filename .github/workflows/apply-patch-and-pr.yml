@@ -1,0 +1,72 @@
+name: Apply Patch and Create PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      patch_path:
+        description: 'Path to patch folder inside the repo (e.g. .github/patches/feature-tuner-prototype)'
+        required: true
+        default: '.github/patches/feature-tuner-prototype'
+      branch_name:
+        description: 'PR branch name'
+        required: true
+        default: 'feature/tuner-prototype'
+      pr_title:
+        description: 'Pull request title'
+        required: true
+        default: 'feat: add FH5 tuner prototype (CSV→JSON, CarPicker, scripts)'
+      pr_body:
+        description: 'Pull request body'
+        required: true
+        default: 'Apply prepared patch: adds generated fh5_cars.json and CarPicker components.'
+
+jobs:
+  apply-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate patch path
+        id: validate
+        run: |
+          if [ ! -d "${{ github.workspace }}/${{ github.event.inputs.patch_path }}" ]; then
+            echo "::error::Patch path '${{ github.event.inputs.patch_path }}' not found in repository."
+            exit 1
+          fi
+          echo "Patch path is present: ${{ github.event.inputs.patch_path }}"
+
+      - name: Copy patch contents to temporary folder
+        run: |
+          rm -rf /tmp/patch_apply || true
+          mkdir -p /tmp/patch_apply
+          cp -R "${{ github.workspace }}/${{ github.event.inputs.patch_path }}/." /tmp/patch_apply/
+
+      - name: Create branch for patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch -c "${{ github.event.inputs.branch_name }}" || git checkout -b "${{ github.event.inputs.branch_name }}"
+
+      - name: Apply patch files into repo
+        run: |
+          # copy into repo root (overwrite)
+          rsync -av --delete /tmp/patch_apply/ "${{ github.workspace }}/"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit (patch already applied)."
+          else
+            git commit -m "Apply patch: ${{ github.event.inputs.patch_path }}"
+            git push --set-upstream origin "${{ github.event.inputs.branch_name }}"
+          fi
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Apply patch: ${{ github.event.inputs.patch_path }}"
+          branch: ${{ github.event.inputs.branch_name }}
+          title: ${{ github.event.inputs.pr_title }}
+          body: ${{ github.event.inputs.pr_body }}
