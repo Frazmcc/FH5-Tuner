@@ -1,0 +1,272 @@
+Style,Manufacturer,Name,Size,Price
+Sport,BBS,SR,15,5000
+Sport,BBS,LM,16,7500
+Sport,BBS,CH-R,17,8500
+Sport,Enkei,RPF1,15,4500
+Sport,Enkei,NT03,16,6000
+Sport,Enkei,RP03,17,7000
+Sport,Volk,TE37,15,8000
+Sport,Volk,CE28N,16,9000
+Sport,Volk,RE30,17,10000
+Sport,Rays,GramLights 57DR,15,6500
+Sport,Rays,GramLights 57CR,16,7500
+Sport,OZ,Ultraleggera,17,9500
+Sport,OZ,Superturismo,18,11000
+Sport,Advan,RG-D,17,8500
+Sport,Advan,RGIII,18,10500
+Sport,Work,Emotion CR Kiwami,17,9000
+Sport,Work,Meister S1,18,11500
+Racing,Rotiform,BLQ,18,12000
+Racing,Rotiform,KPS,19,13500
+Racing,TSW,Nurburgring,18,10500
+Racing,TSW,Bathurst,19,12000
+Racing,HRE,P40SC,19,25000
+Racing,HRE,P101,20,30000
+Racing,Forgeline,GA1R,19,28000
+Racing,Forgeline,VX3C,20,32000
+Racing,CCW,LM20,18,20000
+Racing,CCW,D11L,19,23000
+Racing,Fifteen52,Turbomac,17,8000
+Racing,Fifteen52,Tarmac,18,9500
+Racing,Speedline,Corse,17,9000
+Racing,Speedline,SL434,18,11000
+Offroad,Method,MR502 VT-SPEC,15,5500
+Offroad,Method,MR305 NV,16,6500
+Offroad,Method,MR701,17,7500
+Offroad,Black Rhino,Armory,17,7000
+Offroad,Black Rhino,Warlord,18,8500
+Offroad,KMC,XD Series Grenade,17,8000
+Offroad,KMC,XD Series Rockstar,18,9500
+Offroad,Fuel,Trophy,17,7500
+Offroad,Fuel,Assault,18,8500
+Offroad,Pro Comp,Series 69,15,4500
+Offroad,Pro Comp,Series 89,16,5500
+Drag,Weld,S71,15,6000
+Drag,Weld,RT-S,15,6500
+Drag,Weld,V-Series,16,7500
+Drag,Billet Specialties,Street Lite,15,8000
+Drag,Billet Specialties,Comp 5,15,8500
+Drag,Mickey Thompson,Classic III,15,5500
+Drag,Mickey Thompson,Sportsman,15,6000
+Drag,Centerline,Auto Drag,15,5000
+Drag,American Racing,VN450,15,4500
+Drag,American Racing,VN507,15,5000
+Stock,OEM,15-inch Steel,15,1000
+Stock,OEM,16-inch Steel,16,1200
+Stock,OEM,17-inch Alloy,17,2000
+Stock,OEM,18-inch Alloy,18,2500
+Stock,OEM,19-inch Alloy,19,3000
+Sport,Konig,Hypergram,17,4500
+Sport,Konig,Freeform,18,5500
+Sport,Sparco,Assetto Gara,17,6000
+Sport,Sparco,Pro Corsa,18,7000
+Sport,Motegi,MR116,17,5000
+Sport,Motegi,MR142,18,6000
+Racing,Enkei,RPF1 Race,17,9000
+Racing,Enkei,NT03+M,18,11000
+Racing,Volk,TE37SL,17,12000
+Racing,Volk,CE28SL,18,14000
+Racing,Advan,RGII,18,11500
+Racing,Advan,Racing GT,19,13500
+Racing,Rays,57Xtreme,18,10500
+Racing,Rays,G25,19,12500
+Racing,Work,Emotion XD9,18,10000
+Racing,Work,VS-XX,19,12000
+Racing,SSR,Type-C,18,11000
+Racing,SSR,Professor SP1,19,13000
+Racing,Desmond,Regamaster,17,8500
+Racing,Desmond,Evo,18,10000
+Racing,Cosmis,XT-206R,18,6500
+Racing,Cosmis,S1,19,7500
+Offroad,Icon,Rebound,17,7000
+Offroad,Icon,Compression,18,8000
+Offroad,Vision,Manx,17,6000
+Offroad,Vision,Rocker,18,7000
+Offroad,Ultra,Hunter,17,5500
+Offroad,Ultra,Xtreme,18,6500
+Offroad,Dick Cepek,DC-1,17,6500
+Offroad,Dick Cepek,Torque,18,7500
+Offroad,Mayhem,Warrior,17,7000
+Offroad,Mayhem,Combat,18,8000
+Offroad,Moto Metal,MO970,17,7500
+Offroad,Moto Metal,MO962,18,8500
+Offroad,XD Series,Rockstar II,17,8000
+Offroad,XD Series,Addict,18,9000
+Drag,Cragar,S/S,15,5500
+Drag,Cragar,Eliminator,15,6000
+Drag,Boyd,Smoothie,15,7000
+Drag,Boyd,Hotrod,15,7500
+Drag,US Mags,Standard,15,5000
+Drag,US Mags,Indy,15,5500
+Drag,Rocket Racing,Fuel,15,6000
+Drag,Rocket Racing,Igniter,15,6500
+Drag,Vision,Nitro,15,5000
+Drag,Vision,Daytona,15,5500
+Drag,Radir,Tri-Rib,15,4500
+Drag,Radir,Smoothie,15,5000
+Sport,Rota,Grid,17,3500
+Sport,Rota,Slipstream,18,4000
+Sport,ESR,RF2,18,4500
+Sport,ESR,SR08,19,5000
+Sport,Avid.1,AV20,18,3500
+Sport,Avid.1,AV06,19,4000
+Racing,Titan7,T-S5,18,15000
+Racing,Titan7,T-R10,19,17000
+Racing,Apex,ARC-8,18,12000
+Racing,Apex,EC-7,19,14000
+Racing,6UL,6UL,15,6000
+Racing,6UL,6UL+,16,7000
+Racing,Konig,Dial-In,15,5500
+Racing,Konig,Runlite,16,6500
+Offroad,Trail Ready,HD Series,17,8500
+Offroad,Trail Ready,Beadlock,17,10000
+Offroad,Walker Evans,Legend,17,9500
+Offroad,Walker Evans,Racing,17,11000
+Offroad,Dirty Life,Roadkill,17,7500
+Offroad,Dirty Life,Theory,18,8500
+Offroad,Raceline,Trophy,17,8000
+Offroad,Raceline,Assault,18,9000
+Offroad,ATX,Slab,17,6500
+Offroad,ATX,Chamber,18,7500
+Offroad,Hostile,Sprocket,17,9000
+Offroad,Hostile,Jigsaw,18,10500
+Offroad,Gear,Big Block,17,7000
+Offroad,Gear,Throttle,18,8000
+Sport,Drag,DR-31,17,4000
+Sport,Drag,DR-38,18,4500
+Sport,XXR,527,18,3000
+Sport,XXR,530,19,3500
+Sport,Aodhan,AH-X,18,3500
+Sport,Aodhan,DS02,19,4000
+Racing,TE37V,TE37V,18,13000
+Racing,TE37V,TE37V SL,19,15000
+Racing,CE28N,CE28N Time Attack,18,12000
+Racing,CE28N,CE28N Spec,19,14000
+Racing,Gram Lights,57C6,18,9500
+Racing,Gram Lights,57FXX,19,11000
+Racing,Work,VS KF,18,13000
+Racing,Work,Emotion 11R,19,15000
+Racing,Advan,RZ-DF,18,12500
+Racing,Advan,RG-D2,19,14500
+Drag,Boyd Coddington,Stardust,15,9000
+Drag,Boyd Coddington,Junkyard Dog,15,9500
+Drag,Intro,Billet,15,7500
+Drag,Intro,Smoothie,15,8000
+Drag,Colorado Custom,Sombrero,15,7000
+Drag,Colorado Custom,Radir,15,7500
+Drag,Wheel Vintiques,56 Spoke,15,6500
+Drag,Wheel Vintiques,Smoothie,15,7000
+Offroad,Fuel,Anza,17,8500
+Offroad,Fuel,Maverick,18,9500
+Offroad,Black Rhino,Locker,17,8000
+Offroad,Black Rhino,Arsenal,18,9000
+Offroad,KMC,Bully,17,8500
+Offroad,KMC,Crosshair,18,9500
+Offroad,Ballistic,Jester,17,7500
+Offroad,Ballistic,Morax,18,8500
+Offroad,Moto Metal,MO951,17,8000
+Offroad,Moto Metal,MO985,18,9000
+Racing,Forgeline,GA3R,19,29000
+Racing,Forgeline,VX3C-SL,20,33000
+Racing,HRE,FF01,19,26000
+Racing,HRE,FF15,20,31000
+Racing,BBS,FI-R,18,18000
+Racing,BBS,E88,19,20000
+Racing,OZ,Racing Ultraleggera HLT,18,13000
+Racing,OZ,Racing Superforgiata,19,15000
+Sport,Enkei,Raijin,18,7500
+Sport,Enkei,Tuning SC38,19,8500
+Sport,Volk,TE37 Ultra,18,11000
+Sport,Volk,CE28 Club Racer,19,12500
+Sport,Rays,G25 Edge,18,11000
+Sport,Rays,57Transcend,19,12500
+Sport,Work,Emotion ZR10,18,10500
+Sport,Work,Meister M1 3P,19,12000
+Sport,SSR,GTX01,18,9500
+Sport,SSR,GTX02,19,11000
+Sport,Desmond,Regamaster Evo,18,9500
+Sport,Desmond,Wise Sports,19,11000
+Sport,Advan,Racing RS-DF,18,10000
+Sport,Advan,Racing RZ-DF,19,11500
+Racing,CCW,LM5T,19,24000
+Racing,CCW,D11,20,27000
+Racing,Fifteen52,Formula TR,18,10000
+Racing,Fifteen52,Apex,19,12000
+Racing,Speedline,SL675,18,12000
+Racing,Speedline,Corse 2118,19,14000
+Offroad,Method,MR701 Trail,17,8000
+Offroad,Method,MR502 Rally,17,9000
+Offroad,Icon,Rebound Pro,17,8500
+Offroad,Icon,Alloys,18,9500
+Offroad,Black Rhino,Overland,17,8500
+Offroad,Black Rhino,Armory Beadlock,17,10000
+Offroad,KMC,XD229 Machete Crawl,17,9500
+Offroad,KMC,XD140 Recon,18,10500
+Offroad,Fuel,Vector,17,9000
+Offroad,Fuel,Sledge,18,10000
+Offroad,Vision,Rocker Beadlock,17,8000
+Offroad,Vision,351 Widow,18,9000
+Offroad,Pro Comp,La Paz,17,7500
+Offroad,Pro Comp,Series 1089,18,8500
+Drag,Weld,ProStar,15,7000
+Drag,Weld,Magnum,15,7500
+Drag,Mickey Thompson,ET Street SS,15,6500
+Drag,Mickey Thompson,Classic Lock,15,7000
+Drag,Billet Specialties,SLG,15,9000
+Drag,Billet Specialties,Legacy,15,9500
+Drag,American Racing,Torq Thrust,15,5500
+Drag,American Racing,VN215,15,6000
+Drag,Centerline,Convo Pro,15,5500
+Drag,Centerline,Forged Aluminum,15,6000
+Drag,Cragar,Eliminator Polished,15,6500
+Drag,Cragar,Keystone Klassic,15,7000
+Sport,Cosmis,Racing XT-206R,18,7000
+Sport,Cosmis,Racing S5R,19,8000
+Sport,Rota,Grid-V,18,4500
+Sport,Rota,Titan,19,5000
+Sport,ESR,SR09,18,5000
+Sport,ESR,RF15,19,5500
+Sport,Avid.1,AV30,18,4000
+Sport,Avid.1,SL02,19,4500
+Sport,Konig,Freeform Matte,18,6000
+Sport,Konig,Dekagram,19,7000
+Sport,Sparco,Assetto Gara Matte,18,7500
+Sport,Sparco,FF-1,19,8500
+Sport,Motegi,MR140,18,6500
+Sport,Motegi,MR147,19,7500
+Racing,Apex,SM-10,18,13000
+Racing,Apex,EC-7R,19,15000
+Racing,Titan7,T-WR7,18,16000
+Racing,Titan7,T-D6,19,18000
+Racing,Konig,Ampliform,18,8000
+Racing,Konig,Integram,19,9500
+Sport,XXR,559,18,3500
+Sport,XXR,571,19,4000
+Sport,Aodhan,DS07,18,4000
+Sport,Aodhan,LS009,19,4500
+Sport,Drag,DR-34,18,4500
+Sport,Drag,DR-35,19,5000
+Offroad,Dirty Life,Roadkill Race,17,8500
+Offroad,Dirty Life,DT-1,18,9500
+Offroad,Raceline,Podium,17,8500
+Offroad,Raceline,Clutch,18,9500
+Offroad,ATX,Ravine,17,7500
+Offroad,ATX,Ledge,18,8500
+Offroad,Hostile,Alpha,17,10000
+Offroad,Hostile,Exile,18,11500
+Offroad,Gear,Alloy 726,17,7500
+Offroad,Gear,Alloy 762,18,8500
+Offroad,Mayhem,8301 Flat Iron,17,8000
+Offroad,Mayhem,8303 Prodigy,18,9000
+Offroad,Moto Metal,MO970 Black,17,8500
+Offroad,Moto Metal,MO990,18,9500
+Offroad,XD Series,XD827,17,9000
+Offroad,XD Series,XD820,18,10000
+Racing,Work,Emotion CR Ultimate,18,14000
+Racing,Work,Meister M1R,19,16000
+Racing,Rays,TE37SL Pressed,18,15000
+Racing,Rays,CE28SL Pressed,19,17000
+Racing,Volk,TE37V Mark-II,18,14000
+Racing,Volk,CE28 Club Racer II,19,16000
+Racing,SSR,GTF01,18,12000
+Racing,SSR,Type-F,19,14000
