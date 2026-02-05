@@ -23,7 +23,6 @@ interface RimEntry {
   Style?: string;
   Size?: string | number;
   Price?: string | number;
-  // tolerate lowercase keys too
   manufacturer?: string;
   name?: string;
   style?: string;
@@ -38,7 +37,6 @@ interface PartsFormProps {
   rims?: RimEntry[];
 }
 
-// Fixed style list in the requested order
 const FIXED_RIM_STYLES = ['Sport', 'Multi-Piece', 'Specialised', 'Stock'] as const;
 type FixedStyle = typeof FIXED_RIM_STYLES[number];
 
@@ -49,35 +47,23 @@ function rimGet(v: RimEntry, ...keys: string[]) {
   return undefined;
 }
 
-function rimLabel(rim: RimEntry) {
-  const manufacturer = String(rimGet(rim, 'Manufacturer', 'manufacturer') ?? '').trim();
-  const name = String(rimGet(rim, 'Name', 'name') ?? '').trim();
-  const size = rimGet(rim, 'Size', 'size');
-  const price = rimGet(rim, 'Price', 'price');
-  const sizeStr = size ? ` (${size})` : '';
-  const priceStr = price ? ` - $${price}` : '';
-  return `${manufacturer} ${name}${sizeStr}${priceStr}`.trim();
+function rimModel(rim: RimEntry) {
+  // The "model" is the Name field
+  return String(rimGet(rim, 'Name', 'name') ?? '').trim();
 }
 
-// Normalize arbitrary rim style strings into one of the FIXED_RIM_STYLES.
-// This handles common aliases/casing.
 function normalizeToFixedStyle(raw?: string | null): FixedStyle | null {
   if (!raw) return null;
   const s = String(raw).trim().toLowerCase();
   if (!s) return null;
-
   if (s.includes('sport')) return 'Sport';
   if (s.includes('multi')) return 'Multi-Piece';
   if (s.includes('split')) return 'Multi-Piece';
-  if (s.includes('special') || s.includes('specialized') || s.includes('specialised')) return 'Specialised';
+  if (s.includes('special') || s.includes('specialis') || s.includes('specializ')) return 'Specialised';
   if (s.includes('stock')) return 'Stock';
-
-  // fallback heuristics: try exact matches to fixed styles
   for (const fs of FIXED_RIM_STYLES) {
     if (s === fs.toLowerCase()) return fs;
   }
-
-  // if nothing matched, prefer Stock as safe default
   return 'Stock';
 }
 
@@ -85,9 +71,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
   const renderControl = (section: string, partName: string, partConfig: PartOption) => {
     const currentValue = values[section]?.[partName] || '';
 
-    // Helper to render rim selects (style -> wheel)
     const renderRimsSelector = () => {
-      // build rims grouped by normalized style
       const rimsByStyle: Record<FixedStyle, RimEntry[]> = {
         'Sport': [],
         'Multi-Piece': [],
@@ -103,19 +87,16 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
         }
       }
 
-      // currently selected wheel (separate stored key)
       const wheelKey = `${partName}-Rim`;
       const selectedWheel = values[section]?.[wheelKey] || '';
 
       return (
         <div className="dropdown-group">
-          {/* Style dropdown: fixed list & order */}
           <select
             value={currentValue}
             onChange={(e) => {
               const newStyle = e.target.value;
               onValueChange(section, partName, newStyle);
-              // clear previously selected wheel for this part when style changes
               onValueChange(section, wheelKey, '');
             }}
             className="style-select"
@@ -128,7 +109,6 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
             ))}
           </select>
 
-          {/* wheel list for selected style */}
           <select
             value={selectedWheel}
             onChange={(e) => onValueChange(section, wheelKey, e.target.value)}
@@ -136,17 +116,20 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
             disabled={!currentValue}
             style={{ marginTop: 8 }}
           >
-            <option value="">{currentValue ? 'Select rim...' : 'Select a style first'}</option>
+            <option value="">{currentValue ? 'Select rim model...' : 'Select a style first'}</option>
 
             {currentValue &&
-              (rimsByStyle[currentValue as FixedStyle] || []).map((r, idx) => (
-                <option
-                  key={idx}
-                  value={`${String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '')}|||${String(rimGet(r, 'Name', 'name') ?? '')}`}
-                >
-                  {rimLabel(r)}
-                </option>
-              ))}
+              (rimsByStyle[currentValue as FixedStyle] || []).map((r, idx) => {
+                const model = rimModel(r);
+                const manufacturer = String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '').trim();
+                // keep value encoding manufacturer|||model for later parsing if needed
+                const val = `${manufacturer}|||${model}`;
+                return (
+                  <option key={idx} value={val}>
+                    {model}
+                  </option>
+                );
+              })}
           </select>
         </div>
       );
@@ -154,11 +137,9 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
     switch (partConfig.control) {
       case 'button':
-        // convert former button groups into dropdowns
         if (section === 'Rims' && rims) {
           return renderRimsSelector();
         }
-
         return (
           <select
             value={currentValue}
@@ -178,7 +159,6 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
         if (section === 'Rims' && rims) {
           return renderRimsSelector();
         }
-
         return (
           <select value={currentValue} onChange={(e) => onValueChange(section, partName, e.target.value)}>
             <option value="">Select...</option>
