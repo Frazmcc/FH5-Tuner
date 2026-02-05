@@ -17,24 +17,42 @@ function rimLabel(rim) {
   return `${manufacturer} ${name}${sizeStr}${priceStr}`.trim();
 }
 
+const FIXED_RIM_STYLES = ['Sport', 'Multi-Piece', 'Specialised', 'Stock'];
+
+function normalizeToFixedStyle(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim().toLowerCase();
+  if (!s) return null;
+  if (s.includes('sport')) return 'Sport';
+  if (s.includes('multi')) return 'Multi-Piece';
+  if (s.includes('split')) return 'Multi-Piece';
+  if (s.includes('special') || s.includes('specialis') || s.includes('specializ')) return 'Specialised';
+  if (s.includes('stock')) return 'Stock';
+  for (const fs of FIXED_RIM_STYLES) {
+    if (s === fs.toLowerCase()) return fs;
+  }
+  return 'Stock';
+}
+
 export default function PartGroup({ section, parts, selectedValues, onSelect, rims }) {
   const renderControl = (part, partData) => {
     const value = selectedValues[part] || '';
 
     // For rim parts render style select and then wheel select
     if (section === 'Rims') {
-      // collect unique styles
-      const styles = [];
-      const seen = new Set();
+      // build rims grouped by normalized style
+      const rimsByStyle = {
+        'Sport': [],
+        'Multi-Piece': [],
+        'Specialised': [],
+        'Stock': [],
+      };
+
       if (rims && rims.length) {
         for (const r of rims) {
-          const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
-          if (!style) continue;
-          const key = style.toLowerCase();
-          if (!seen.has(key)) {
-            seen.add(key);
-            styles.push(style);
-          }
+          const rawStyle = rimGet(r, 'Style', 'style') ?? '';
+          const normalized = normalizeToFixedStyle(rawStyle);
+          if (normalized) rimsByStyle[normalized].push(r);
         }
       }
 
@@ -48,12 +66,11 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             onChange={(e) => {
               const newStyle = e.target.value;
               onSelect(section, part, newStyle);
-              // clear selected wheel when style changes
               onSelect(section, wheelKey, '');
             }}
           >
             <option value="">Select Style</option>
-            {styles.map((s) => (
+            {FIXED_RIM_STYLES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -67,22 +84,17 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             style={{ marginTop: 8 }}
           >
             <option value="">{value ? 'Select rim...' : 'Select a style first'}</option>
-            {rims
-              ?.filter((r) => {
-                const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
-                return style && value && style.toLowerCase() === value.toLowerCase();
-              })
-              .map((r, idx) => (
-                <option key={idx} value={`${String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '')}|||${String(rimGet(r, 'Name', 'name') ?? '')}`}>
-                  {rimLabel(r)}
-                </option>
-              ))}
+            {(value && rimsByStyle[value])?.map((r, idx) => (
+              <option key={idx} value={`${String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '')}|||${String(rimGet(r, 'Name', 'name') ?? '')}`}>
+                {rimLabel(r)}
+              </option>
+            ))}
           </select>
         </div>
       );
     }
 
-    // non-rim controls: preserve existing behavior
+    // non-rim controls
     if (partData.control === 'button' || partData.control === 'dropdown') {
       return (
         <select value={value} onChange={(e) => onSelect(section, part, e.target.value)} className="part-select">
