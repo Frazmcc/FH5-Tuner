@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, ChangeEvent } from 'react';
+import { useMemo, useState, useEffect, ChangeEvent } from 'react';
 import { loadCars, Car } from '../utils/loadCars';
 
 type Props = {
@@ -163,12 +163,7 @@ export default function CarPicker({
       <div style={{ marginTop: 8 }}>
         {selectedCar ? (
           <div style={{ padding: 8, border: '1px solid #eee', borderRadius: 6 }}>
-            <strong>
-              {selectedCar.manufacturer} {selectedCar.model} {selectedCar.year ?? ''}
-            </strong>
-            <div style={{ fontSize: 13, color: '#555', marginTop: 6 }}>
-              PI: {selectedCar.pi ?? '—'} • Power: {selectedCar.power_hp ?? '—'} hp • Weight: {selectedCar.weight_lbs ?? '—'} lbs
-            </div>
+            <strong>{labelFor(selectedCar)}</strong>
           </div>
         ) : (
           <div style={{ color: '#777' }}>No car selected.</div>
