@@ -5,7 +5,7 @@ type Props = {
   onSelect?: (car: Car | null) => void;
   initialManufacturer?: string;
   initialModel?: string;
-  showYearSelector?: boolean; // still supported but default UX will set year from model selection
+  showYearSelector?: boolean; // still supported
 };
 
 function uniqueSortedPreserveCase(items: string[]): string[] {
@@ -43,19 +43,16 @@ export default function CarPicker({
   const modelYearOptions = useMemo(() => {
     if (!manufacturer) return [] as ModelYear[];
 
-    // collect {model, year} from cars for the manufacturer
     const variants = cars
       .filter((c) => c.manufacturer === manufacturer)
       .map((c) => ({ model: c.model, year: c.year ?? '' as number | '' }));
 
-    // dedupe by case-insensitive model + year, preserve first-seen casing
     const map = new Map<string, ModelYear>();
     for (const v of variants) {
       const key = `${String(v.model).trim().toLowerCase()}|${String(v.year)}`;
       if (!map.has(key)) map.set(key, v);
     }
 
-    // convert to array and sort by year desc (missing year last), then model asc
     const arr = Array.from(map.values());
     arr.sort((a, b) => {
       const ay = typeof a.year === 'number' ? a.year : -1;
@@ -66,7 +63,6 @@ export default function CarPicker({
     return arr;
   }, [cars, manufacturer]);
 
-  // helper to format option label as "YEAR / MODEL" (or "MODEL" if year missing)
   function formatModelYearLabel(m: ModelYear) {
     return m.year ? `${m.year} / ${m.model}` : m.model;
   }
@@ -74,7 +70,6 @@ export default function CarPicker({
   // selected car object (prefers explicit year if set)
   const selectedCar = useMemo(() => {
     if (!manufacturer || !model) return null;
-    // if year set, match exact row; otherwise pick first matching model
     if (year && typeof year === 'number') {
       return cars.find((c) => c.manufacturer === manufacturer && c.model === model && c.year === year) ?? null;
     }
@@ -89,7 +84,6 @@ export default function CarPicker({
   // reset model/year if manufacturer changes and selection invalid
   useEffect(() => {
     if (manufacturer) {
-      // if current model isn't in new manufacturer's variants, reset
       const found = modelYearOptions.some((opt) => opt.model === model && opt.year === year);
       if (!found) {
         setModel('');
@@ -103,17 +97,13 @@ export default function CarPicker({
 
   // reset year when model changes (unless model selection sets year)
   useEffect(() => {
-    // keep current year only if it matches an available variant for (manufacturer, model)
     if (model) {
       const match = modelYearOptions.find((opt) => opt.model === model && opt.year === year);
-      if (!match) {
-        setYear('');
-      }
+      if (!match) setYear('');
     } else {
       setYear('');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model]);
+  }, [model, modelYearOptions, year]);
 
   function handleManufacturerChange(e: ChangeEvent<HTMLSelectElement>) {
     setManufacturer(e.target.value);
@@ -121,22 +111,25 @@ export default function CarPicker({
     setYear('');
   }
 
-  function handleModelChange(e: ChangeEvent<HTMLSelectElement>) {
-    const val = e.target.value;
-    // value will be encoded as "model|||year" or just "model|||" if no year
-    // we encode as JSON string to avoid separator issues
-    try {
-      const parsed = JSON.parse(val) as ModelYear;
-      setModel(parsed.model);
-      setYear(parsed.year ?? '');
-    } catch {
-      // fallback - treat as raw model string
-      setModel(val);
-      setYear('');
-    }
+  // Use a simple delimiter encoding "model|||year" (year empty => '')
+  function encodeModelYear(m: ModelYear) {
+    return `${m.model}|||${m.year === '' ? '' : String(m.year)}`;
   }
 
-  // small preview label for the selected car
+  function handleModelChange(e: ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value;
+    if (!val) {
+      setModel('');
+      setYear('');
+      return;
+    }
+    const parts = val.split('|||');
+    const parsedModel = parts[0] ?? '';
+    const parsedYear = parts[1] ? Number(parts[1]) : '';
+    setModel(parsedModel);
+    setYear(parsedYear === '' || Number.isNaN(parsedYear) ? '' : parsedYear);
+  }
+
   function labelFor(c?: Car | null): string {
     if (!c) return '';
     const parts: string[] = [];
@@ -170,21 +163,19 @@ export default function CarPicker({
       </label>
       <select
         id="model-select"
-        value={model ? JSON.stringify({ model, year }) : ''}
+        value={model ? encodeModelYear({ model, year }) : ''}
         onChange={handleModelChange}
         style={{ width: '100%', padding: 8, marginBottom: 12 }}
         disabled={!manufacturer}
       >
         <option value="">{manufacturer ? '— Select model (year) —' : '— Select manufacturer first —'}</option>
         {modelYearOptions.map((opt) => (
-          // encode full object in value so we can set both model & year on select
-          <option key={`${opt.model}|||${String(opt.year)}`} value={JSON.stringify(opt)}>
+          <option key={`${opt.model}|||${String(opt.year)}`} value={encodeModelYear(opt)}>
             {formatModelYearLabel(opt)}
           </option>
         ))}
       </select>
 
-      {/* keep optional year selector if you still want to override year separately */}
       {showYearSelector && model && (
         <>
           <label htmlFor="year-select" style={{ display: 'block', marginBottom: 6 }}>
