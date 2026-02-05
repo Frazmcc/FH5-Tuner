@@ -5,7 +5,7 @@ type Props = {
   onSelect?: (car: Car | null) => void;
   initialManufacturer?: string;
   initialModel?: string;
-  showYearSelector?: boolean;
+  showYearSelector?: boolean; // still supported but default UX will set year from model selection
 };
 
 function uniqueSortedPreserveCase(items: string[]): string[] {
@@ -19,6 +19,8 @@ function uniqueSortedPreserveCase(items: string[]): string[] {
   return Array.from(map.values()).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 }
 
+type ModelYear = { model: string; year: number | '' };
+
 export default function CarPicker({
   onSelect,
   initialManufacturer = '',
@@ -31,52 +33,86 @@ export default function CarPicker({
   const [model, setModel] = useState<string>(initialModel);
   const [year, setYear] = useState<number | ''>('');
 
+  // manufacturers list (unique, sorted)
   const manufacturers = useMemo(() => {
     const names = cars.map((c) => c.manufacturer);
     return uniqueSortedPreserveCase(names);
   }, [cars]);
 
-  const modelsForManufacturer = useMemo(() => {
-    if (!manufacturer) return [] as string[];
-    const filtered = cars
+  // model+year variants for the selected manufacturer
+  const modelYearOptions = useMemo(() => {
+    if (!manufacturer) return [] as ModelYear[];
+
+    // collect {model, year} from cars for the manufacturer
+    const variants = cars
       .filter((c) => c.manufacturer === manufacturer)
-      .map((c) => c.model);
-    return uniqueSortedPreserveCase(filtered);
+      .map((c) => ({ model: c.model, year: c.year ?? '' as number | '' }));
+
+    // dedupe by case-insensitive model + year, preserve first-seen casing
+    const map = new Map<string, ModelYear>();
+    for (const v of variants) {
+      const key = `${String(v.model).trim().toLowerCase()}|${String(v.year)}`;
+      if (!map.has(key)) map.set(key, v);
+    }
+
+    // convert to array and sort by year desc (missing year last), then model asc
+    const arr = Array.from(map.values());
+    arr.sort((a, b) => {
+      const ay = typeof a.year === 'number' ? a.year : -1;
+      const by = typeof b.year === 'number' ? b.year : -1;
+      if (ay !== by) return by - ay; // newer years first
+      return a.model.localeCompare(b.model);
+    });
+    return arr;
   }, [cars, manufacturer]);
 
-  const yearsForSelection = useMemo(() => {
-    if (!manufacturer || !model) return [] as number[];
-    const years = cars
-      .filter((c) => c.manufacturer === manufacturer && c.model === model)
-      .map((c) => (c.year ?? null))
-      .filter((y): y is number => typeof y === 'number');
-    return Array.from(new Set(years)).sort((a, b) => a - b);
-  }, [cars, manufacturer, model]);
+  // helper to format option label as "YEAR / MODEL" (or "MODEL" if year missing)
+  function formatModelYearLabel(m: ModelYear) {
+    return m.year ? `${m.year} / ${m.model}` : m.model;
+  }
 
+  // selected car object (prefers explicit year if set)
   const selectedCar = useMemo(() => {
     if (!manufacturer || !model) return null;
-    const candidates = cars.filter((c) => c.manufacturer === manufacturer && c.model === model);
-    if (candidates.length === 0) return null;
+    // if year set, match exact row; otherwise pick first matching model
     if (year && typeof year === 'number') {
-      const byYear = candidates.find((c) => c.year === year);
-      if (byYear) return byYear;
+      return cars.find((c) => c.manufacturer === manufacturer && c.model === model && c.year === year) ?? null;
     }
-    return candidates[0];
+    return cars.find((c) => c.manufacturer === manufacturer && c.model === model) ?? null;
   }, [cars, manufacturer, model, year]);
 
+  // notify parent when selection changes
   useEffect(() => {
     if (onSelect) onSelect(selectedCar);
   }, [selectedCar, onSelect]);
 
+  // reset model/year if manufacturer changes and selection invalid
   useEffect(() => {
-    if (manufacturer && model && !modelsForManufacturer.includes(model)) {
+    if (manufacturer) {
+      // if current model isn't in new manufacturer's variants, reset
+      const found = modelYearOptions.some((opt) => opt.model === model && opt.year === year);
+      if (!found) {
+        setModel('');
+        setYear('');
+      }
+    } else {
       setModel('');
       setYear('');
     }
-  }, [manufacturer, modelsForManufacturer, model]);
+  }, [manufacturer, modelYearOptions]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // reset year when model changes (unless model selection sets year)
   useEffect(() => {
-    setYear('');
+    // keep current year only if it matches an available variant for (manufacturer, model)
+    if (model) {
+      const match = modelYearOptions.find((opt) => opt.model === model && opt.year === year);
+      if (!match) {
+        setYear('');
+      }
+    } else {
+      setYear('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model]);
 
   function handleManufacturerChange(e: ChangeEvent<HTMLSelectElement>) {
@@ -86,20 +122,32 @@ export default function CarPicker({
   }
 
   function handleModelChange(e: ChangeEvent<HTMLSelectElement>) {
-    setModel(e.target.value);
+    const val = e.target.value;
+    // value will be encoded as "model|||year" or just "model|||" if no year
+    // we encode as JSON string to avoid separator issues
+    try {
+      const parsed = JSON.parse(val) as ModelYear;
+      setModel(parsed.model);
+      setYear(parsed.year ?? '');
+    } catch {
+      // fallback - treat as raw model string
+      setModel(val);
+      setYear('');
+    }
   }
 
+  // small preview label for the selected car
   function labelFor(c?: Car | null): string {
     if (!c) return '';
     const parts: string[] = [];
     if (typeof c.pi === 'number') parts.push(`PI ${c.pi}`);
     if (typeof c.power_hp === 'number') parts.push(`${c.power_hp} hp`);
     if (typeof c.weight_lbs === 'number') parts.push(`@ ${c.weight_lbs} lbs`);
-    return `${c.manufacturer} ${c.model}${c.year ? ' ' + c.year : ''}${parts.length ? ' — ' + parts.join(' | ') : ''}`;
+    return `${c.year ? c.year + ' / ' : ''}${c.manufacturer} ${c.model}${parts.length ? ' — ' + parts.join(' | ') : ''}`;
   }
 
   return (
-    <div style={{ maxWidth: 560 }}>
+    <div style={{ maxWidth: 700 }}>
       <label htmlFor="manufacturer-select" style={{ display: 'block', marginBottom: 6 }}>
         Manufacturer
       </label>
@@ -118,24 +166,26 @@ export default function CarPicker({
       </select>
 
       <label htmlFor="model-select" style={{ display: 'block', marginBottom: 6 }}>
-        Model
+        Model (Year)
       </label>
       <select
         id="model-select"
-        value={model}
+        value={model ? JSON.stringify({ model, year }) : ''}
         onChange={handleModelChange}
         style={{ width: '100%', padding: 8, marginBottom: 12 }}
         disabled={!manufacturer}
       >
-        <option value="">{manufacturer ? '— Select model —' : '— Select manufacturer first —'}</option>
-        {modelsForManufacturer.map((m) => (
-          <option key={m} value={m}>
-            {m}
+        <option value="">{manufacturer ? '— Select model (year) —' : '— Select manufacturer first —'}</option>
+        {modelYearOptions.map((opt) => (
+          // encode full object in value so we can set both model & year on select
+          <option key={`${opt.model}|||${String(opt.year)}`} value={JSON.stringify(opt)}>
+            {formatModelYearLabel(opt)}
           </option>
         ))}
       </select>
 
-      {showYearSelector && modelsForManufacturer.length > 0 && (
+      {/* keep optional year selector if you still want to override year separately */}
+      {showYearSelector && model && (
         <>
           <label htmlFor="year-select" style={{ display: 'block', marginBottom: 6 }}>
             Year / Variant
@@ -151,11 +201,20 @@ export default function CarPicker({
             disabled={!model}
           >
             <option value="">{model ? '— Select year (optional) —' : '— Select model first —'}</option>
-            {yearsForSelection.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
+            {Array.from(
+              new Set(
+                cars
+                  .filter((c) => c.manufacturer === manufacturer && c.model === model)
+                  .map((c) => c.year)
+                  .filter((y): y is number => typeof y === 'number'),
+              ),
+            )
+              .sort((a, b) => b - a)
+              .map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
           </select>
         </>
       )}
