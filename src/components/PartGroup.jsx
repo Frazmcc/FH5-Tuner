@@ -1,51 +1,13 @@
 import React from 'react';
 
-interface PartOption {
-  control: 'button' | 'dropdown' | 'text';
-  options?: string[];
-  default?: string;
-  hint?: string;
-}
-
-interface PartsSchema {
-  sections: {
-    [sectionName: string]: {
-      parts: {
-        [partName: string]: PartOption;
-      };
-    };
-  };
-}
-
-interface RimEntry {
-  Manufacturer?: string;
-  Name?: string;
-  Style?: string;
-  Size?: string | number;
-  Price?: string | number;
-  // tolerate lowercase keys too
-  manufacturer?: string;
-  name?: string;
-  style?: string;
-  size?: string | number;
-  price?: string | number;
-}
-
-interface PartsFormProps {
-  schema: PartsSchema;
-  values: { [section: string]: { [part: string]: string } };
-  onValueChange: (section: string, part: string, value: string) => void;
-  rims?: RimEntry[];
-}
-
-function rimGet(v: RimEntry, ...keys: string[]) {
+function rimGet(v, ...keys) {
   for (const k of keys) {
-    if ((v as any)[k] !== undefined) return (v as any)[k];
+    if (v[k] !== undefined) return v[k];
   }
   return undefined;
 }
 
-function rimLabel(rim: RimEntry) {
+function rimLabel(rim) {
   const manufacturer = String(rimGet(rim, 'Manufacturer', 'manufacturer') ?? '').trim();
   const name = String(rimGet(rim, 'Name', 'name') ?? '').trim();
   const size = rimGet(rim, 'Size', 'size');
@@ -55,16 +17,16 @@ function rimLabel(rim: RimEntry) {
   return `${manufacturer} ${name}${sizeStr}${priceStr}`.trim();
 }
 
-export default function PartsForm({ schema, values, onValueChange, rims }: PartsFormProps) {
-  const renderControl = (section: string, partName: string, partConfig: PartOption) => {
-    const currentValue = values[section]?.[partName] || '';
+export default function PartGroup({ section, parts, selectedValues, onSelect, rims }) {
+  const renderControl = (part, partData) => {
+    const value = selectedValues[part] || '';
 
-    // Helper to render rim selects (style -> wheel)
-    const renderRimsSelector = () => {
-      // build unique styles from rims list
-      const styles: string[] = [];
+    // For rim parts render style select and then wheel select
+    if (section === 'Rims') {
+      // collect unique styles
+      const styles = [];
+      const seen = new Set();
       if (rims && rims.length) {
-        const seen = new Set<string>();
         for (const r of rims) {
           const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
           if (!style) continue;
@@ -76,24 +38,21 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
         }
       }
 
-      // currently selected wheel (separate stored key)
-      const wheelKey = `${partName}-Rim`;
-      const selectedWheel = values[section]?.[wheelKey] || '';
+      const wheelKey = `${part}-Rim`;
+      const selectedWheel = selectedValues[wheelKey] || '';
 
       return (
         <div className="dropdown-group">
           <select
-            value={currentValue}
+            value={value}
             onChange={(e) => {
               const newStyle = e.target.value;
-              // update style for the part
-              onValueChange(section, partName, newStyle);
-              // clear previously selected wheel for this part when style changes
-              onValueChange(section, wheelKey, '');
+              onSelect(section, part, newStyle);
+              // clear selected wheel when style changes
+              onSelect(section, wheelKey, '');
             }}
-            className="style-select"
           >
-            <option value="">Select rim style</option>
+            <option value="">Select Style</option>
             {styles.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -101,19 +60,17 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
             ))}
           </select>
 
-          {/* wheel list for selected style */}
           <select
             value={selectedWheel}
-            onChange={(e) => onValueChange(section, wheelKey, e.target.value)}
-            className="rim-select"
-            disabled={!currentValue}
+            onChange={(e) => onSelect(section, wheelKey, e.target.value)}
+            disabled={!value}
             style={{ marginTop: 8 }}
           >
-            <option value="">{currentValue ? 'Select rim...' : 'Select a style first'}</option>
+            <option value="">{value ? 'Select rim...' : 'Select a style first'}</option>
             {rims
               ?.filter((r) => {
                 const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
-                return style && currentValue && style.toLowerCase() === currentValue.toLowerCase();
+                return style && value && style.toLowerCase() === value.toLowerCase();
               })
               .map((r, idx) => (
                 <option key={idx} value={`${String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '')}|||${String(rimGet(r, 'Name', 'name') ?? '')}`}>
@@ -123,76 +80,44 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
           </select>
         </div>
       );
-    };
-
-    switch (partConfig.control) {
-      case 'button':
-        // convert former button groups into dropdowns (except rim special handled below)
-        if (section === 'Rims' && rims) {
-          return renderRimsSelector();
-        }
-
-        return (
-          <select
-            value={currentValue}
-            onChange={(e) => onValueChange(section, partName, e.target.value)}
-            className="part-select"
-          >
-            <option value="">Select...</option>
-            {partConfig.options?.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
-
-      case 'dropdown':
-        if (section === 'Rims' && rims) {
-          // treat 'dropdown' in Rims the same as above
-          return renderRimsSelector();
-        }
-
-        return (
-          <select value={currentValue} onChange={(e) => onValueChange(section, partName, e.target.value)}>
-            <option value="">Select...</option>
-            {partConfig.options?.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
-
-      case 'text':
-        return (
-          <input
-            type="text"
-            value={currentValue}
-            onChange={(e) => onValueChange(section, partName, e.target.value)}
-            placeholder={partConfig.default || partConfig.hint || ''}
-          />
-        );
-
-      default:
-        return null;
     }
+
+    // non-rim controls: preserve existing behavior
+    if (partData.control === 'button' || partData.control === 'dropdown') {
+      return (
+        <select value={value} onChange={(e) => onSelect(section, part, e.target.value)} className="part-select">
+          <option value="">Select Option</option>
+          {partData.options && partData.options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    if (partData.control === 'text') {
+      return (
+        <input
+          type="text"
+          value={value || partData.default || ''}
+          onChange={(e) => onSelect(section, part, e.target.value)}
+          placeholder={partData.hint}
+          className="text-input"
+        />
+      );
+    }
+
+    return null;
   };
 
   return (
-    <div className="parts-form">
-      {Object.entries(schema.sections).map(([sectionName, sectionData]) => (
-        <div key={sectionName} className="part-section">
-          <h3>{sectionName}</h3>
-          <div className="part-grid">
-            {Object.entries(sectionData.parts).map(([partName, partConfig]) => (
-              <div key={partName} className="part-control">
-                <label>{partName}</label>
-                {renderControl(sectionName, partName, partConfig)}
-                {partConfig.hint && <span className="hint">{partConfig.hint}</span>}
-              </div>
-            ))}
-          </div>
+    <div className="part-group">
+      <h3>{section}</h3>
+      {Object.entries(parts).map(([part, partData]) => (
+        <div key={part} className="part-row">
+          <label>{part}:</label>
+          {renderControl(part, partData)}
         </div>
       ))}
     </div>
