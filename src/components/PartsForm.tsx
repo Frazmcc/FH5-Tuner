@@ -34,9 +34,10 @@ interface PartsFormProps {
   schema: PartsSchema;
   values: { [section: string]: { [part: string]: string } };
   onValueChange: (section: string, part: string, value: string) => void;
-  rims?: RimEntry[];
+  rims?: RimEntry[]; // loaded from data/fh5_rims.json
 }
 
+// fixed styles
 const FIXED_RIM_STYLES = ['Sport', 'Multi-Piece', 'Specialised', 'Stock'] as const;
 type FixedStyle = typeof FIXED_RIM_STYLES[number];
 
@@ -47,18 +48,12 @@ function rimGet(v: RimEntry, ...keys: string[]) {
   return undefined;
 }
 
-function rimModel(rim: RimEntry) {
-  // The "model" is the Name field
-  return String(rimGet(rim, 'Name', 'name') ?? '').trim();
-}
-
 function normalizeToFixedStyle(raw?: string | null): FixedStyle | null {
   if (!raw) return null;
   const s = String(raw).trim().toLowerCase();
   if (!s) return null;
   if (s.includes('sport')) return 'Sport';
-  if (s.includes('multi')) return 'Multi-Piece';
-  if (s.includes('split')) return 'Multi-Piece';
+  if (s.includes('multi') || s.includes('split') || s.includes('piece')) return 'Multi-Piece';
   if (s.includes('special') || s.includes('specialis') || s.includes('specializ')) return 'Specialised';
   if (s.includes('stock')) return 'Stock';
   for (const fs of FIXED_RIM_STYLES) {
@@ -67,37 +62,91 @@ function normalizeToFixedStyle(raw?: string | null): FixedStyle | null {
   return 'Stock';
 }
 
+function dedupeSorted(values: string[]) {
+  return Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b));
+}
+
 export default function PartsForm({ schema, values, onValueChange, rims }: PartsFormProps) {
   const renderControl = (section: string, partName: string, partConfig: PartOption) => {
-    const currentValue = values[section]?.[partName] || '';
+    const currentStyle = values[section]?.[partName] || '';
+    const manufacturerKey = `${partName}-Manufacturer`;
+    const nameKey = `${partName}-Name`;
+    const sizeKey = `${partName}-Size`;
+    const combinedKey = `${partName}-Rim`; // keep for compatibility
 
-    const renderRimsSelector = () => {
-      const rimsByStyle: Record<FixedStyle, RimEntry[]> = {
-        'Sport': [],
-        'Multi-Piece': [],
-        'Specialised': [],
-        'Stock': [],
-      };
+    const currentManufacturer = values[section]?.[manufacturerKey] || '';
+    const currentName = values[section]?.[nameKey] || '';
+    const currentSize = values[section]?.[sizeKey] || '';
 
-      if (rims && rims.length) {
-        for (const r of rims) {
-          const rawStyle = rimGet(r, 'Style', 'style') ?? '';
-          const normalized = normalizeToFixedStyle(String(rawStyle));
-          if (normalized) rimsByStyle[normalized].push(r);
-        }
+    // build rims grouped or derived lists
+    const rimsList = rims || [];
+
+    // manufacturers for a style
+    const manufacturersForStyle = React.useMemo(() => {
+      if (!currentStyle) return [] as string[];
+      const ms: string[] = rimsList
+        .filter((r) => {
+          const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
+          const norm = normalizeToFixedStyle(style);
+          return norm && norm === currentStyle;
+        })
+        .map((r) => String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '').trim());
+      return dedupeSorted(ms);
+    }, [rimsList, currentStyle]);
+
+    // names for style + manufacturer
+    const namesForStyleManufacturer = React.useMemo(() => {
+      if (!currentStyle || !currentManufacturer) return [] as string[];
+      const ns: string[] = rimsList
+        .filter((r) => {
+          const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
+          const norm = normalizeToFixedStyle(style);
+          const man = String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '').trim();
+          return norm === currentStyle && man.toLowerCase() === currentManufacturer.toLowerCase();
+        })
+        .map((r) => String(rimGet(r, 'Name', 'name') ?? '').trim());
+      return dedupeSorted(ns);
+    }, [rimsList, currentStyle, currentManufacturer]);
+
+    // sizes for style+manufacturer+name
+    const sizesForSelection = React.useMemo(() => {
+      if (!currentStyle || !currentManufacturer || !currentName) return [] as string[];
+      const ss: string[] = rimsList
+        .filter((r) => {
+          const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
+          const norm = normalizeToFixedStyle(style);
+          const man = String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '').trim();
+          const name = String(rimGet(r, 'Name', 'name') ?? '').trim();
+          return norm === currentStyle && man.toLowerCase() === currentManufacturer.toLowerCase() && name === currentName;
+        })
+        .map((r) => String(rimGet(r, 'Size', 'size') ?? '').trim());
+      return dedupeSorted(ss);
+    }, [rimsList, currentStyle, currentManufacturer, currentName]);
+
+    // helper to update combined value for backwards compatibility
+    const updateCombined = (man: string, nm: string, sz: string) => {
+      if (man && nm && sz) {
+        onValueChange(section, combinedKey, `${man}|||${nm}|||${sz}`);
+      } else {
+        onValueChange(section, combinedKey, '');
       }
+    };
 
-      const wheelKey = `${partName}-Rim`;
-      const selectedWheel = values[section]?.[wheelKey] || '';
-
+    // Render the 4-select rim UI for Rims section
+    const renderRimFourDropdowns = () => {
       return (
-        <div className="dropdown-group">
+        <div className="rim-4-group">
+          {/* Dropdown 1: Style */}
           <select
-            value={currentValue}
+            value={currentStyle}
             onChange={(e) => {
-              const newStyle = e.target.value;
-              onValueChange(section, partName, newStyle);
-              onValueChange(section, wheelKey, '');
+              const s = e.target.value;
+              onValueChange(section, partName, s);
+              // clear downstream
+              onValueChange(section, manufacturerKey, '');
+              onValueChange(section, nameKey, '');
+              onValueChange(section, sizeKey, '');
+              onValueChange(section, combinedKey, '');
             }}
             className="style-select"
           >
@@ -109,58 +158,89 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
             ))}
           </select>
 
+          {/* Dropdown 2: Manufacturer (filtered by style) */}
           <select
-            value={selectedWheel}
-            onChange={(e) => onValueChange(section, wheelKey, e.target.value)}
-            className="rim-select"
-            disabled={!currentValue}
+            value={currentManufacturer}
+            onChange={(e) => {
+              const m = e.target.value;
+              onValueChange(section, manufacturerKey, m);
+              // clear downstream
+              onValueChange(section, nameKey, '');
+              onValueChange(section, sizeKey, '');
+              onValueChange(section, combinedKey, '');
+            }}
+            disabled={!currentStyle}
             style={{ marginTop: 8 }}
           >
-            <option value="">{currentValue ? 'Select rim model...' : 'Select a style first'}</option>
+            <option value="">{currentStyle ? 'Select manufacturer...' : 'Select a style first'}</option>
+            {manufacturersForStyle.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
 
-            {currentValue &&
-              (rimsByStyle[currentValue as FixedStyle] || []).map((r, idx) => {
-                const model = rimModel(r);
-                const manufacturer = String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '').trim();
-                // keep value encoding manufacturer|||model for later parsing if needed
-                const val = `${manufacturer}|||${model}`;
-                return (
-                  <option key={idx} value={val}>
-                    {model}
-                  </option>
-                );
-              })}
+          {/* Dropdown 3: Rim Name (filtered by style+manufacturer) */}
+          <select
+            value={currentName}
+            onChange={(e) => {
+              const nm = e.target.value;
+              onValueChange(section, nameKey, nm);
+              // clear size and combined
+              onValueChange(section, sizeKey, '');
+              onValueChange(section, combinedKey, '');
+            }}
+            disabled={!currentManufacturer}
+            style={{ marginTop: 8 }}
+          >
+            <option value="">{currentManufacturer ? 'Select rim model...' : 'Select a manufacturer first'}</option>
+            {namesForStyleManufacturer.map((nm) => (
+              <option key={nm} value={nm}>
+                {nm}
+              </option>
+            ))}
+          </select>
+
+          {/* Dropdown 4: Rim Size (filtered by style+manufacturer+name) */}
+          <select
+            value={currentSize}
+            onChange={(e) => {
+              const sz = e.target.value;
+              onValueChange(section, sizeKey, sz);
+              // update combined as manufacturer|||name|||size
+              const man = values[section]?.[manufacturerKey] || '';
+              const nm = values[section]?.[nameKey] || '';
+              updateCombined(man, nm, sz);
+            }}
+            disabled={!currentName}
+            style={{ marginTop: 8 }}
+          >
+            <option value="">{currentName ? 'Select rim size...' : 'Select a rim model first'}</option>
+            {sizesForSelection.map((sz) => (
+              <option key={sz} value={sz}>
+                {sz}
+              </option>
+            ))}
           </select>
         </div>
       );
     };
 
+    // Switch by control type
     switch (partConfig.control) {
       case 'button':
-        if (section === 'Rims' && rims) {
-          return renderRimsSelector();
+      case 'dropdown':
+        // only Rims section gets the 4-dropdown UI
+        if (section === 'Rims' && rims && rims.length) {
+          return renderRimFourDropdowns();
         }
+        // otherwise render a single select
         return (
           <select
-            value={currentValue}
+            value={values[section]?.[partName] || ''}
             onChange={(e) => onValueChange(section, partName, e.target.value)}
             className="part-select"
           >
-            <option value="">Select...</option>
-            {partConfig.options?.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
-
-      case 'dropdown':
-        if (section === 'Rims' && rims) {
-          return renderRimsSelector();
-        }
-        return (
-          <select value={currentValue} onChange={(e) => onValueChange(section, partName, e.target.value)}>
             <option value="">Select...</option>
             {partConfig.options?.map((option) => (
               <option key={option} value={option}>
@@ -174,7 +254,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
         return (
           <input
             type="text"
-            value={currentValue}
+            value={values[section]?.[partName] || ''}
             onChange={(e) => onValueChange(section, partName, e.target.value)}
             placeholder={partConfig.default || partConfig.hint || ''}
           />
