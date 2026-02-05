@@ -21,7 +21,7 @@ interface PartsFormProps {
   schema: PartsSchema;
   values: { [section: string]: { [part: string]: string } };
   onValueChange: (section: string, part: string, value: string) => void;
-  rims?: Array<{ Name: string; Manufacturer: string; Style: string }>;
+  rims?: Array<{ Name: string; Manufacturer: string; Style: string; size?: number; price?: number }>;
 }
 
 export default function PartsForm({ schema, values, onValueChange, rims }: PartsFormProps) {
@@ -30,40 +30,76 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
     switch (partConfig.control) {
       case 'button':
-        return (
-          <div className="button-group">
-            {partConfig.options?.map((option) => (
-              <button
-                key={option}
-                className={currentValue === option ? 'active' : ''}
-                onClick={() => onValueChange(section, partName, option)}
+        // Replace radio-style buttons with a dropdown
+        // Special handling for Rims section remains
+        if (section === 'Rims' && partConfig.options && rims) {
+          return (
+            <div className="dropdown-group">
+              <select
+                value={currentValue}
+                onChange={(e) => onValueChange(section, partName, e.target.value)}
               >
-                {option}
-              </button>
+                <option value="">Select rim style...</option>
+                {partConfig.options.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+
+              {currentValue && currentValue !== 'Stock' && (
+                <select
+                  value={values[section]?.[`${partName}-Rim`] || ''}
+                  onChange={(e) => onValueChange(section, `${partName}-Rim`, e.target.value)}
+                >
+                  <option value="">Select rim</option>
+                  {rims
+                    .filter(rim => rim.Style === currentValue)
+                    .map((rim, idx) => (
+                      <option key={idx} value={`${rim.Manufacturer} ${rim.Name}`}>
+                        {rim.Manufacturer} {rim.Name} ({rim.size ?? ''})
+                      </option>
+                    ))}
+                </select>
+              )}
+            </div>
+          );
+        }
+
+        // Generic dropdown replacement for 'button' control
+        return (
+          <select
+            value={currentValue}
+            onChange={(e) => onValueChange(section, partName, e.target.value)}
+            className="part-select"
+          >
+            <option value="">Select...</option>
+            {partConfig.options?.map((option) => (
+              <option key={option} value={option}>{option}</option>
             ))}
-          </div>
+          </select>
         );
 
       case 'dropdown':
         // Special handling for rim dropdowns
         if (section === 'Rims' && rims) {
           return (
-            <select
-              value={currentValue}
-              onChange={(e) => onValueChange(section, partName, e.target.value)}
-            >
-              <option value="">Select rim...</option>
-              {partConfig.options?.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-              <optgroup label="Available Rims">
-                {rims.map((rim, idx) => (
-                  <option key={idx} value={`${rim.Manufacturer} ${rim.Name}`}>
-                    {rim.Manufacturer} {rim.Name} ({rim.Style})
-                  </option>
+            <div className="dropdown-group">
+              <select
+                value={currentValue}
+                onChange={(e) => onValueChange(section, partName, e.target.value)}
+              >
+                <option value="">Select rim...</option>
+                {partConfig.options?.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
                 ))}
-              </optgroup>
-            </select>
+                <optgroup label="Available Rims">
+                  {rims.map((rim, idx) => (
+                    <option key={idx} value={`${rim.Manufacturer} ${rim.Name}`}>
+                      {rim.Manufacturer} {rim.Name} ({rim.Style})
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
           );
         }
 
