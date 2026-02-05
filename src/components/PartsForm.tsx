@@ -17,54 +17,121 @@ interface PartsSchema {
   };
 }
 
+interface RimEntry {
+  Manufacturer?: string;
+  Name?: string;
+  Style?: string;
+  Size?: string | number;
+  Price?: string | number;
+  // tolerate lowercase keys too
+  manufacturer?: string;
+  name?: string;
+  style?: string;
+  size?: string | number;
+  price?: string | number;
+}
+
 interface PartsFormProps {
   schema: PartsSchema;
   values: { [section: string]: { [part: string]: string } };
   onValueChange: (section: string, part: string, value: string) => void;
-  rims?: Array<{ Name: string; Manufacturer: string; Style: string; size?: number; price?: number }>;
+  rims?: RimEntry[];
+}
+
+function rimGet(v: RimEntry, ...keys: string[]) {
+  for (const k of keys) {
+    if ((v as any)[k] !== undefined) return (v as any)[k];
+  }
+  return undefined;
+}
+
+function rimLabel(rim: RimEntry) {
+  const manufacturer = String(rimGet(rim, 'Manufacturer', 'manufacturer') ?? '').trim();
+  const name = String(rimGet(rim, 'Name', 'name') ?? '').trim();
+  const size = rimGet(rim, 'Size', 'size');
+  const price = rimGet(rim, 'Price', 'price');
+  const sizeStr = size ? ` (${size})` : '';
+  const priceStr = price ? ` - $${price}` : '';
+  return `${manufacturer} ${name}${sizeStr}${priceStr}`.trim();
 }
 
 export default function PartsForm({ schema, values, onValueChange, rims }: PartsFormProps) {
   const renderControl = (section: string, partName: string, partConfig: PartOption) => {
     const currentValue = values[section]?.[partName] || '';
 
+    // Helper to render rim selects (style -> wheel)
+    const renderRimsSelector = () => {
+      // build unique styles from rims list
+      const styles: string[] = [];
+      if (rims && rims.length) {
+        const seen = new Set<string>();
+        for (const r of rims) {
+          const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
+          if (!style) continue;
+          const key = style.toLowerCase();
+          if (!seen.has(key)) {
+            seen.add(key);
+            styles.push(style);
+          }
+        }
+      }
+
+      // currently selected wheel (separate stored key)
+      const wheelKey = `${partName}-Rim`;
+      const selectedWheel = values[section]?.[wheelKey] || '';
+
+      return (
+        <div className="dropdown-group">
+          <select
+            value={currentValue}
+            onChange={(e) => {
+              const newStyle = e.target.value;
+              // update style for the part
+              onValueChange(section, partName, newStyle);
+              // clear previously selected wheel for this part when style changes
+              onValueChange(section, wheelKey, '');
+            }}
+            className="style-select"
+          >
+            <option value="">Select rim style</option>
+            {styles.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+
+          {/* wheel list for selected style */}
+          <select
+            value={selectedWheel}
+            onChange={(e) => onValueChange(section, wheelKey, e.target.value)}
+            className="rim-select"
+            disabled={!currentValue}
+            style={{ marginTop: 8 }}
+          >
+            <option value="">{currentValue ? 'Select rim...' : 'Select a style first'}</option>
+            {rims
+              ?.filter((r) => {
+                const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
+                return style && currentValue && style.toLowerCase() === currentValue.toLowerCase();
+              })
+              .map((r, idx) => (
+                <option key={idx} value={`${String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '')}|||${String(rimGet(r, 'Name', 'name') ?? '')}`}>
+                  {rimLabel(r)}
+                </option>
+              ))}
+          </select>
+        </div>
+      );
+    };
+
     switch (partConfig.control) {
       case 'button':
-        // Replace radio-style buttons with a dropdown
-        // Special handling for Rims section remains
-        if (section === 'Rims' && partConfig.options && rims) {
-          return (
-            <div className="dropdown-group">
-              <select
-                value={currentValue}
-                onChange={(e) => onValueChange(section, partName, e.target.value)}
-              >
-                <option value="">Select rim style...</option>
-                {partConfig.options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-
-              {currentValue && currentValue !== 'Stock' && (
-                <select
-                  value={values[section]?.[`${partName}-Rim`] || ''}
-                  onChange={(e) => onValueChange(section, `${partName}-Rim`, e.target.value)}
-                >
-                  <option value="">Select rim</option>
-                  {rims
-                    .filter(rim => rim.Style === currentValue)
-                    .map((rim, idx) => (
-                      <option key={idx} value={`${rim.Manufacturer} ${rim.Name}`}>
-                        {rim.Manufacturer} {rim.Name} ({rim.size ?? ''})
-                      </option>
-                    ))}
-                </select>
-              )}
-            </div>
-          );
+        // convert former button groups into dropdowns (except rim special handled below)
+        if (section === 'Rims' && rims) {
+          return renderRimsSelector();
         }
 
-        // Generic dropdown replacement for 'button' control
         return (
           <select
             value={currentValue}
@@ -73,44 +140,26 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
           >
             <option value="">Select...</option>
             {partConfig.options?.map((option) => (
-              <option key={option} value={option}>{option}</option>
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
         );
 
       case 'dropdown':
-        // Special handling for rim dropdowns
         if (section === 'Rims' && rims) {
-          return (
-            <div className="dropdown-group">
-              <select
-                value={currentValue}
-                onChange={(e) => onValueChange(section, partName, e.target.value)}
-              >
-                <option value="">Select rim...</option>
-                {partConfig.options?.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-                <optgroup label="Available Rims">
-                  {rims.map((rim, idx) => (
-                    <option key={idx} value={`${rim.Manufacturer} ${rim.Name}`}>
-                      {rim.Manufacturer} {rim.Name} ({rim.Style})
-                    </option>
-                  ))}
-                </optgroup>
-              </select>
-            </div>
-          );
+          // treat 'dropdown' in Rims the same as above
+          return renderRimsSelector();
         }
 
         return (
-          <select
-            value={currentValue}
-            onChange={(e) => onValueChange(section, partName, e.target.value)}
-          >
+          <select value={currentValue} onChange={(e) => onValueChange(section, partName, e.target.value)}>
             <option value="">Select...</option>
             {partConfig.options?.map((option) => (
-              <option key={option} value={option}>{option}</option>
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
         );
