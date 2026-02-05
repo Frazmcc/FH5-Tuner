@@ -4,25 +4,10 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
   const renderControl = (part, partData) => {
     const value = selectedValues[part] || '';
     const key = `${section}-${part}`;
-    
+
+    // Treat 'button' controls as dropdowns now
     if (partData.control === 'button') {
-      return (
-        <div className="options-group">
-          {partData.options.map(option => (
-            <button
-              key={option}
-              className={`option-btn ${value === option ? 'selected' : ''}`}
-              onClick={() => onSelect(section, part, option)}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      );
-    }
-    
-    if (partData.control === 'dropdown') {
-      // For rim styles, show style selector
+      // For rim styles we still need the special two-level UI
       if (part.includes('Rims Style')) {
         return (
           <div className="dropdown-group">
@@ -36,7 +21,7 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
                 <option key={option} value={option}>{option}</option>
               ))}
             </select>
-            
+
             {value && value !== 'Stock' && rims && (
               <select
                 value={selectedValues[`${part}-Rim`] || ''}
@@ -56,7 +41,8 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
           </div>
         );
       }
-      
+
+      // Generic dropdown replacement for former button controls
       return (
         <select
           value={value}
@@ -70,7 +56,57 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
         </select>
       );
     }
-    
+
+    if (partData.control === 'dropdown') {
+      // For rim styles, show style selector
+      if (part.includes('Rims Style')) {
+        return (
+          <div className="dropdown-group">
+            <select
+              value={value}
+              onChange={(e) => onSelect(section, part, e.target.value)}
+              className="style-select"
+            >
+              <option value="">Select Style</option>
+              {partData.options.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+
+            {value && value !== 'Stock' && rims && (
+              <select
+                value={selectedValues[`${part}-Rim`] || ''}
+                onChange={(e) => onSelect(section, `${part}-Rim`, e.target.value)}
+                className="rim-select"
+              >
+                <option value="">Select Rim</option>
+                {rims
+                  .filter(rim => rim.style === value)
+                  .map((rim, idx) => (
+                    <option key={idx} value={rim.name}>
+                      {rim.manufacturer} {rim.name} ({rim.size}") - ${rim.price}
+                    </option>
+                  ))}
+              </select>
+            )}
+          </div>
+        );
+      }
+
+      return (
+        <select
+          value={value}
+          onChange={(e) => onSelect(section, part, e.target.value)}
+          className="part-select"
+        >
+          <option value="">Select Option</option>
+          {partData.options.map(option => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+      );
+    }
+
     if (partData.control === 'text') {
       return (
         <input
@@ -82,10 +118,10 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
         />
       );
     }
-    
+
     return null;
   };
-  
+
   return (
     <div className="part-group">
       <h3>{section}</h3>
