@@ -7,14 +7,8 @@ function rimGet(v, ...keys) {
   return undefined;
 }
 
-function rimLabel(rim) {
-  const manufacturer = String(rimGet(rim, 'Manufacturer', 'manufacturer') ?? '').trim();
-  const name = String(rimGet(rim, 'Name', 'name') ?? '').trim();
-  const size = rimGet(rim, 'Size', 'size');
-  const price = rimGet(rim, 'Price', 'price');
-  const sizeStr = size ? ` (${size})` : '';
-  const priceStr = price ? ` - $${price}` : '';
-  return `${manufacturer} ${name}${sizeStr}${priceStr}`.trim();
+function rimModel(rim) {
+  return String(rimGet(rim, 'Name', 'name') ?? '').trim();
 }
 
 const FIXED_RIM_STYLES = ['Sport', 'Multi-Piece', 'Specialised', 'Stock'];
@@ -38,9 +32,7 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
   const renderControl = (part, partData) => {
     const value = selectedValues[part] || '';
 
-    // For rim parts render style select and then wheel select
     if (section === 'Rims') {
-      // build rims grouped by normalized style
       const rimsByStyle = {
         'Sport': [],
         'Multi-Piece': [],
@@ -83,18 +75,23 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             disabled={!value}
             style={{ marginTop: 8 }}
           >
-            <option value="">{value ? 'Select rim...' : 'Select a style first'}</option>
-            {(value && rimsByStyle[value])?.map((r, idx) => (
-              <option key={idx} value={`${String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '')}|||${String(rimGet(r, 'Name', 'name') ?? '')}`}>
-                {rimLabel(r)}
-              </option>
-            ))}
+            <option value="">{value ? 'Select rim model...' : 'Select a style first'}</option>
+            {value &&
+              (rimsByStyle[value] || []).map((r, idx) => {
+                const model = rimModel(r);
+                const manufacturer = String(rimGet(r, 'Manufacturer', 'manufacturer') ?? '').trim();
+                const val = `${manufacturer}|||${model}`;
+                return (
+                  <option key={idx} value={val}>
+                    {model}
+                  </option>
+                );
+              })}
           </select>
         </div>
       );
     }
 
-    // non-rim controls
     if (partData.control === 'button' || partData.control === 'dropdown') {
       return (
         <select value={value} onChange={(e) => onSelect(section, part, e.target.value)} className="part-select">
