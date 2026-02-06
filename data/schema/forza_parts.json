@@ -130,6 +130,16 @@
     },
     "Engine": {
       "parts": {
+        "Aspiration": {
+          "control": "dropdown",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race",
+            "Race with Anti-lag"
+          ]
+        },
         "Intake": {
           "control": "button",
           "options": [

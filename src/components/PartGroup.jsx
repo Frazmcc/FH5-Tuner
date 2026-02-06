@@ -30,9 +30,38 @@ function normalizeToFixedStyle(raw) {
   return 'Stock';
 }
 
-export default function PartGroup({ section, parts, selectedValues, onSelect, rims }) {
+export default function PartGroup({ section, parts, selectedValues, allSelectedValues, onSelect, rims }) {
   const renderControl = (part, partData) => {
     const value = selectedValues[part] || '';
+
+    // Engine Aspiration options depend on Conversion -> Aspiration (type)
+    if (section === 'Engine' && part === 'Aspiration') {
+      const conversionType = allSelectedValues?.Conversion?.Aspiration || 'Stock';
+      let allowed = ['Stock'];
+      if (conversionType === 'Turbo' || conversionType === 'Twin Turbo') {
+        allowed = ['Stock', 'Street', 'Sport', 'Race', 'Race with Anti-lag'];
+      } else if (conversionType === 'Supercharger' || conversionType === 'Centrifugal Supercharger') {
+        allowed = ['Stock', 'Race'];
+      }
+
+      const effectiveValue = value === '' || value === 'Stock' ? STOCK_SENTINEL : value;
+      const nonStock = allowed.filter((o) => o && o !== 'Stock');
+
+      return (
+        <select
+          value={effectiveValue}
+          onChange={(e) => onSelect(section, part, e.target.value === STOCK_SENTINEL ? 'Stock' : e.target.value)}
+          className="part-select"
+        >
+          <option value={STOCK_SENTINEL}>Stock</option>
+          {nonStock.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      );
+    }
 
     // four-dropdown rim UI
     if (section === 'Rims') {

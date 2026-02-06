@@ -62,6 +62,7 @@ function App() {
               section={section}
               parts={parts}
               selectedValues={formData[section] || {}}
+              allSelectedValues={formData}
               onSelect={handlePartSelect}
               rims={fh5Rims}
             />

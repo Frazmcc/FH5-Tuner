@@ -117,9 +117,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
     {
       key: 'engine',
       title: 'Engine',
-      // NOTE: Aspiration is defined under Conversion in the schema,
-      // but the UI should present it under Engine.
-      sections: ['Engine', 'Conversion'],
+      sections: ['Engine'],
       partOrder: [
         'Aspiration',
         'Intake',
@@ -137,6 +135,27 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
     },
   ];
 
+  const conversionAspirationType = values['Conversion']?.['Aspiration'] || 'Stock';
+
+  const engineAspirationAllowedOptions = React.useMemo(() => {
+    const t = (conversionAspirationType || 'Stock').trim();
+    if (t === 'Turbo' || t === 'Twin Turbo') {
+      return ['Stock', 'Street', 'Sport', 'Race', 'Race with Anti-lag'];
+    }
+    if (t === 'Supercharger' || t === 'Centrifugal Supercharger') {
+      return ['Stock', 'Race'];
+    }
+    return ['Stock'];
+  }, [conversionAspirationType]);
+
+  // If conversion aspiration type changes, ensure engine aspiration level remains valid.
+  React.useEffect(() => {
+    const current = values['Engine']?.['Aspiration'] || 'Stock';
+    if (!engineAspirationAllowedOptions.includes(current)) {
+      onValueChange('Engine', 'Aspiration', 'Stock');
+    }
+  }, [engineAspirationAllowedOptions, onValueChange, values]);
+
   function orderParts(partEntries: Array<[string, PartOption]>, partOrder: string[]) {
     const orderIndex = new Map<string, number>();
     partOrder.forEach((p, i) => orderIndex.set(p, i));
@@ -149,6 +168,33 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
   }
 
   const renderControl = (section: string, partName: string, partConfig: PartOption) => {
+    // Engine Aspiration is an upgrade-level dropdown whose options depend on
+    // Conversion -> Aspiration (type) selection.
+    if (section === 'Engine' && partName === 'Aspiration') {
+      const rawValue = values[section]?.[partName] || '';
+      const effectiveValue = rawValue === '' || rawValue === 'Stock' ? STOCK_SENTINEL : rawValue;
+      const allowed = engineAspirationAllowedOptions;
+      const nonStock = allowed.filter((o) => o && o !== 'Stock');
+
+      return (
+        <select
+          value={effectiveValue}
+          onChange={(e) => {
+            const v = e.target.value;
+            onValueChange(section, partName, v === STOCK_SENTINEL ? 'Stock' : v);
+          }}
+          className="part-select"
+        >
+          <option value={STOCK_SENTINEL}>Stock</option>
+          {nonStock.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
     const currentStyle = values[section]?.[partName] || '';
     const manufacturerKey = `${partName}-Manufacturer`;
     const nameKey = `${partName}-Name`;
@@ -408,11 +454,6 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
           for (const [partName, partConfig] of Object.entries(secData.parts)) {
             // explicitly omit Engine Swap until data exists
             if (sec === 'Conversion' && partName === 'Engine Swap') continue;
-
-             // UI grouping rules:
-             // - Show Aspiration under Engine (but it lives in Conversion in the schema)
-             if (group.key === 'engine' && sec === 'Conversion' && partName !== 'Aspiration') continue;
-
             parts.push([partName, partConfig, sec]);
           }
         }
