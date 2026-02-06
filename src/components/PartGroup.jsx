@@ -94,11 +94,11 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
         <div className="rim-4-group">
           {/* Style */}
           <select
-            value={value === '' || value === 'Stock' ? STOCK_SENTINEL : value}
+            value={value === 'Stock' ? STOCK_SENTINEL : value}
             onChange={(e) => {
               const newStyle = e.target.value;
               if (newStyle === STOCK_SENTINEL) {
-                onSelect(section, part, '');
+                onSelect(section, part, 'Stock');
                 onSelect(section, manufacturerKey, '');
                 onSelect(section, nameKey, '');
                 onSelect(section, sizeKey, '');
@@ -122,94 +122,98 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             ))}
           </select>
 
-          {/* Manufacturer */}
-          <select
-            value={currentManufacturer}
-            onChange={(e) => {
-              const m = e.target.value;
-              if (m === STOCK_SENTINEL) {
-                onSelect(section, part, '');
-                onSelect(section, manufacturerKey, '');
-                onSelect(section, nameKey, '');
-                onSelect(section, sizeKey, '');
-                onSelect(section, combinedKey, '');
-                return;
-              }
-              onSelect(section, manufacturerKey, m);
-              onSelect(section, nameKey, '');
-              onSelect(section, sizeKey, '');
-              onSelect(section, combinedKey, '');
-            }}
-            disabled={!value}
-            style={{ marginTop: 8 }}
-          >
-            <option value={STOCK_SENTINEL}>Stock</option>
-            <option value="">{value ? 'Select manufacturer...' : 'Select a style first'}</option>
-            {manufacturersForStyle.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
+          {value === 'Stock' ? null : (
+            <>
+              {/* Manufacturer */}
+              <select
+                value={currentManufacturer}
+                onChange={(e) => {
+                  const m = e.target.value;
+                  if (m === STOCK_SENTINEL) {
+                    onSelect(section, part, 'Stock');
+                    onSelect(section, manufacturerKey, '');
+                    onSelect(section, nameKey, '');
+                    onSelect(section, sizeKey, '');
+                    onSelect(section, combinedKey, '');
+                    return;
+                  }
+                  onSelect(section, manufacturerKey, m);
+                  onSelect(section, nameKey, '');
+                  onSelect(section, sizeKey, '');
+                  onSelect(section, combinedKey, '');
+                }}
+                disabled={!value}
+                style={{ marginTop: 8 }}
+              >
+                <option value={STOCK_SENTINEL}>Stock</option>
+                <option value="">{value ? 'Select manufacturer...' : 'Select a style first'}</option>
+                {manufacturersForStyle.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
 
-          {/* Name */}
-          <select
-            value={currentName}
-            onChange={(e) => {
-              const nm = e.target.value;
-              if (nm === STOCK_SENTINEL) {
-                onSelect(section, part, '');
-                onSelect(section, manufacturerKey, '');
-                onSelect(section, nameKey, '');
-                onSelect(section, sizeKey, '');
-                onSelect(section, combinedKey, '');
-                return;
-              }
-              onSelect(section, nameKey, nm);
-              onSelect(section, sizeKey, '');
-              onSelect(section, combinedKey, '');
-            }}
-            disabled={!currentManufacturer}
-            style={{ marginTop: 8 }}
-          >
-            <option value={STOCK_SENTINEL}>Stock</option>
-            <option value="">{currentManufacturer ? 'Select rim model...' : 'Select a manufacturer first'}</option>
-            {namesForStyleManufacturer.map((nm) => (
-              <option key={nm} value={nm}>
-                {nm}
-              </option>
-            ))}
-          </select>
+              {/* Name */}
+              <select
+                value={currentName}
+                onChange={(e) => {
+                  const nm = e.target.value;
+                  if (nm === STOCK_SENTINEL) {
+                    onSelect(section, part, 'Stock');
+                    onSelect(section, manufacturerKey, '');
+                    onSelect(section, nameKey, '');
+                    onSelect(section, sizeKey, '');
+                    onSelect(section, combinedKey, '');
+                    return;
+                  }
+                  onSelect(section, nameKey, nm);
+                  onSelect(section, sizeKey, '');
+                  onSelect(section, combinedKey, '');
+                }}
+                disabled={!currentManufacturer}
+                style={{ marginTop: 8 }}
+              >
+                <option value={STOCK_SENTINEL}>Stock</option>
+                <option value="">{currentManufacturer ? 'Select rim model...' : 'Select a manufacturer first'}</option>
+                {namesForStyleManufacturer.map((nm) => (
+                  <option key={nm} value={nm}>
+                    {nm}
+                  </option>
+                ))}
+              </select>
 
-          {/* Size */}
-          <select
-            value={currentSize}
-            onChange={(e) => {
-              const sz = e.target.value;
-              if (sz === STOCK_SENTINEL) {
-                onSelect(section, part, '');
-                onSelect(section, manufacturerKey, '');
-                onSelect(section, nameKey, '');
-                onSelect(section, sizeKey, '');
-                onSelect(section, combinedKey, '');
-                return;
-              }
-              onSelect(section, sizeKey, sz);
-              const man = selectedValues[manufacturerKey] || '';
-              const nm = selectedValues[nameKey] || '';
-              updateCombined(man, nm, sz);
-            }}
-            disabled={!currentName}
-            style={{ marginTop: 8 }}
-          >
-            <option value={STOCK_SENTINEL}>Stock</option>
-            <option value="">{currentName ? 'Select rim size...' : 'Select a rim model first'}</option>
-            {sizesForSelection.map((sz) => (
-              <option key={sz} value={sz}>
-                {sz}
-              </option>
-            ))}
-          </select>
+              {/* Size */}
+              <select
+                value={currentSize}
+                onChange={(e) => {
+                  const sz = e.target.value;
+                  if (sz === STOCK_SENTINEL) {
+                    onSelect(section, part, 'Stock');
+                    onSelect(section, manufacturerKey, '');
+                    onSelect(section, nameKey, '');
+                    onSelect(section, sizeKey, '');
+                    onSelect(section, combinedKey, '');
+                    return;
+                  }
+                  onSelect(section, sizeKey, sz);
+                  const man = selectedValues[manufacturerKey] || '';
+                  const nm = selectedValues[nameKey] || '';
+                  updateCombined(man, nm, sz);
+                }}
+                disabled={!currentName}
+                style={{ marginTop: 8 }}
+              >
+                <option value={STOCK_SENTINEL}>Stock</option>
+                <option value="">{currentName ? 'Select rim size...' : 'Select a rim model first'}</option>
+                {sizesForSelection.map((sz) => (
+                  <option key={sz} value={sz}>
+                    {sz}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
       );
     }

@@ -90,7 +90,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
     // manufacturers for a style
     const manufacturersForStyle = React.useMemo(() => {
-      if (!currentStyle) return [] as string[];
+      if (!currentStyle || currentStyle === 'Stock') return [] as string[];
       const ms: string[] = rimsList
         .filter((r) => {
           const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
@@ -103,7 +103,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
     // names for style + manufacturer
     const namesForStyleManufacturer = React.useMemo(() => {
-      if (!currentStyle || !currentManufacturer) return [] as string[];
+      if (!currentStyle || currentStyle === 'Stock' || !currentManufacturer) return [] as string[];
       const ns: string[] = rimsList
         .filter((r) => {
           const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
@@ -117,7 +117,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
     // sizes for style+manufacturer+name
     const sizesForSelection = React.useMemo(() => {
-      if (!currentStyle || !currentManufacturer || !currentName) return [] as string[];
+      if (!currentStyle || currentStyle === 'Stock' || !currentManufacturer || !currentName) return [] as string[];
       const ss: string[] = rimsList
         .filter((r) => {
           const style = String(rimGet(r, 'Style', 'style') ?? '').trim();
@@ -141,20 +141,18 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
     // Render the 4-select rim UI for Rims section
     const renderRimFourDropdowns = () => {
-      const styleValue = currentStyle === 'Stock' ? '' : currentStyle;
-      const manufacturerValue = currentManufacturer === 'Stock' ? '' : currentManufacturer;
-      const nameValue = currentName === 'Stock' ? '' : currentName;
-      const sizeValue = currentSize === 'Stock' ? '' : currentSize;
+      const isStock = currentStyle === 'Stock';
+      const effectiveStyleValue = currentStyle === 'Stock' ? STOCK_SENTINEL : currentStyle;
 
       return (
         <div className="rim-4-group">
           {/* Dropdown 1: Style */}
           <select
-            value={styleValue || STOCK_SENTINEL}
+            value={effectiveStyleValue}
             onChange={(e) => {
               const s = e.target.value;
               if (s === STOCK_SENTINEL) {
-                onValueChange(section, partName, '');
+                onValueChange(section, partName, 'Stock');
                 onValueChange(section, manufacturerKey, '');
                 onValueChange(section, nameKey, '');
                 onValueChange(section, sizeKey, '');
@@ -180,97 +178,101 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
             ))}
           </select>
 
-          {/* Dropdown 2: Manufacturer (filtered by style) */}
-          <select
-            value={manufacturerValue || (styleValue ? '' : '')}
-            onChange={(e) => {
-              const m = e.target.value;
-              if (m === STOCK_SENTINEL) {
-                onValueChange(section, partName, '');
-                onValueChange(section, manufacturerKey, '');
-                onValueChange(section, nameKey, '');
-                onValueChange(section, sizeKey, '');
-                onValueChange(section, combinedKey, '');
-                return;
-              }
-              onValueChange(section, manufacturerKey, m);
-              // clear downstream
-              onValueChange(section, nameKey, '');
-              onValueChange(section, sizeKey, '');
-              onValueChange(section, combinedKey, '');
-            }}
-            disabled={!styleValue}
-            style={{ marginTop: 8 }}
-          >
-            <option value={STOCK_SENTINEL}>Stock</option>
-            <option value="">{currentStyle ? 'Select manufacturer...' : 'Select a style first'}</option>
-            {manufacturersForStyle.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
+          {isStock ? null : (
+            <>
+              {/* Dropdown 2: Manufacturer (filtered by style) */}
+              <select
+                value={currentManufacturer === 'Stock' ? STOCK_SENTINEL : currentManufacturer}
+                onChange={(e) => {
+                  const m = e.target.value;
+                  if (m === STOCK_SENTINEL) {
+                    onValueChange(section, partName, 'Stock');
+                    onValueChange(section, manufacturerKey, '');
+                    onValueChange(section, nameKey, '');
+                    onValueChange(section, sizeKey, '');
+                    onValueChange(section, combinedKey, '');
+                    return;
+                  }
+                  onValueChange(section, manufacturerKey, m);
+                  // clear downstream
+                  onValueChange(section, nameKey, '');
+                  onValueChange(section, sizeKey, '');
+                  onValueChange(section, combinedKey, '');
+                }}
+                disabled={!currentStyle || currentStyle === 'Stock'}
+                style={{ marginTop: 8 }}
+              >
+                <option value={STOCK_SENTINEL}>Stock</option>
+                <option value="">{currentStyle ? 'Select manufacturer...' : 'Select a style first'}</option>
+                {manufacturersForStyle.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
 
-          {/* Dropdown 3: Rim Name (filtered by style+manufacturer) */}
-          <select
-            value={nameValue || ''}
-            onChange={(e) => {
-              const nm = e.target.value;
-              if (nm === STOCK_SENTINEL) {
-                onValueChange(section, partName, '');
-                onValueChange(section, manufacturerKey, '');
-                onValueChange(section, nameKey, '');
-                onValueChange(section, sizeKey, '');
-                onValueChange(section, combinedKey, '');
-                return;
-              }
-              onValueChange(section, nameKey, nm);
-              // clear size and combined
-              onValueChange(section, sizeKey, '');
-              onValueChange(section, combinedKey, '');
-            }}
-            disabled={!manufacturerValue}
-            style={{ marginTop: 8 }}
-          >
-            <option value={STOCK_SENTINEL}>Stock</option>
-            <option value="">{currentManufacturer ? 'Select rim model...' : 'Select a manufacturer first'}</option>
-            {namesForStyleManufacturer.map((nm) => (
-              <option key={nm} value={nm}>
-                {nm}
-              </option>
-            ))}
-          </select>
+              {/* Dropdown 3: Rim Name (filtered by style+manufacturer) */}
+              <select
+                value={currentName === 'Stock' ? STOCK_SENTINEL : currentName}
+                onChange={(e) => {
+                  const nm = e.target.value;
+                  if (nm === STOCK_SENTINEL) {
+                    onValueChange(section, partName, 'Stock');
+                    onValueChange(section, manufacturerKey, '');
+                    onValueChange(section, nameKey, '');
+                    onValueChange(section, sizeKey, '');
+                    onValueChange(section, combinedKey, '');
+                    return;
+                  }
+                  onValueChange(section, nameKey, nm);
+                  // clear size and combined
+                  onValueChange(section, sizeKey, '');
+                  onValueChange(section, combinedKey, '');
+                }}
+                disabled={!currentManufacturer}
+                style={{ marginTop: 8 }}
+              >
+                <option value={STOCK_SENTINEL}>Stock</option>
+                <option value="">{currentManufacturer ? 'Select rim model...' : 'Select a manufacturer first'}</option>
+                {namesForStyleManufacturer.map((nm) => (
+                  <option key={nm} value={nm}>
+                    {nm}
+                  </option>
+                ))}
+              </select>
 
-          {/* Dropdown 4: Rim Size (filtered by style+manufacturer+name) */}
-          <select
-            value={sizeValue || ''}
-            onChange={(e) => {
-              const sz = e.target.value;
-              if (sz === STOCK_SENTINEL) {
-                onValueChange(section, partName, '');
-                onValueChange(section, manufacturerKey, '');
-                onValueChange(section, nameKey, '');
-                onValueChange(section, sizeKey, '');
-                onValueChange(section, combinedKey, '');
-                return;
-              }
-              onValueChange(section, sizeKey, sz);
-              // update combined as manufacturer|||name|||size
-              const man = values[section]?.[manufacturerKey] || '';
-              const nm = values[section]?.[nameKey] || '';
-              updateCombined(man, nm, sz);
-            }}
-            disabled={!nameValue}
-            style={{ marginTop: 8 }}
-          >
-            <option value={STOCK_SENTINEL}>Stock</option>
-            <option value="">{currentName ? 'Select rim size...' : 'Select a rim model first'}</option>
-            {sizesForSelection.map((sz) => (
-              <option key={sz} value={sz}>
-                {sz}
-              </option>
-            ))}
-          </select>
+              {/* Dropdown 4: Rim Size (filtered by style+manufacturer+name) */}
+              <select
+                value={currentSize === 'Stock' ? STOCK_SENTINEL : currentSize}
+                onChange={(e) => {
+                  const sz = e.target.value;
+                  if (sz === STOCK_SENTINEL) {
+                    onValueChange(section, partName, 'Stock');
+                    onValueChange(section, manufacturerKey, '');
+                    onValueChange(section, nameKey, '');
+                    onValueChange(section, sizeKey, '');
+                    onValueChange(section, combinedKey, '');
+                    return;
+                  }
+                  onValueChange(section, sizeKey, sz);
+                  // update combined as manufacturer|||name|||size
+                  const man = values[section]?.[manufacturerKey] || '';
+                  const nm = values[section]?.[nameKey] || '';
+                  updateCombined(man, nm, sz);
+                }}
+                disabled={!currentName}
+                style={{ marginTop: 8 }}
+              >
+                <option value={STOCK_SENTINEL}>Stock</option>
+                <option value="">{currentName ? 'Select rim size...' : 'Select a rim model first'}</option>
+                {sizesForSelection.map((sz) => (
+                  <option key={sz} value={sz}>
+                    {sz}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
       );
     };
