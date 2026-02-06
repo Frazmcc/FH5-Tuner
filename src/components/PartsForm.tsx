@@ -127,11 +127,6 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
         'Valves',
         'Displacement',
         'Pistons',
-        // forced induction controls (existing schema uses these exact names)
-        'Turbo',
-        'Twin Turbo',
-        'Supercharger',
-        'Centrifugal Supercharger',
         'Intercooler',
         'Oil Cooling',
         'Flywheel',

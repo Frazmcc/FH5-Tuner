@@ -17,6 +17,7 @@
             "Turbo",
             "Twin Turbo",
             "Supercharger",
+            "Centrifugal Supercharger",
             "Naturally Aspirated"
           ]
         }
@@ -197,43 +198,6 @@
           "control": "button",
           "options": [
             "Stock",
-            "Street",
-            "Sport",
-            "Race"
-          ]
-        },
-        "Turbo": {
-          "control": "button",
-          "options": [
-            "None",
-            "Street",
-            "Sport",
-            "Race",
-            "Rally"
-          ]
-        },
-        "Twin Turbo": {
-          "control": "button",
-          "options": [
-            "None",
-            "Street",
-            "Sport",
-            "Race"
-          ]
-        },
-        "Supercharger": {
-          "control": "button",
-          "options": [
-            "None",
-            "Street",
-            "Sport",
-            "Race"
-          ]
-        },
-        "Centrifugal Supercharger": {
-          "control": "button",
-          "options": [
-            "None",
             "Street",
             "Sport",
             "Race"
