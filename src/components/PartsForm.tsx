@@ -74,6 +74,82 @@ function stripStock(options?: string[]) {
 }
 
 export default function PartsForm({ schema, values, onValueChange, rims }: PartsFormProps) {
+  const ORDERED_SECTION_GROUPS: Array<{ key: string; title: string; sections: string[]; partOrder: string[] }> = [
+    {
+      key: 'conversion',
+      title: 'Conversion',
+      sections: ['Conversion'],
+      // Engine Swap intentionally omitted for now
+      partOrder: ['Drivetrain Swap', 'Aspiration'],
+    },
+    {
+      key: 'aero',
+      title: 'Aero and Appearance',
+      sections: ['Aero'],
+      partOrder: ['Front Bumper', 'Side Skirts', 'Rear Bumper', 'Rear Wing'],
+    },
+    {
+      key: 'tyres-rims',
+      title: 'Tyres and Rims',
+      sections: ['Tires', 'Rims'],
+      partOrder: [
+        // closest equivalents to your list using existing schema names
+        'Front Compound',
+        'Rear Compound',
+        'Front Track Width',
+        'Rear Track Width',
+        'Front Rims Style',
+        'Rear Rims Style',
+      ],
+    },
+    {
+      key: 'drivetrain',
+      title: 'Drivetrain',
+      sections: ['Drivetrain'],
+      partOrder: ['Clutch', 'Transmission', 'Driveline', 'Differential'],
+    },
+    {
+      key: 'platform',
+      title: 'Platform and Handling',
+      sections: ['Platform'],
+      partOrder: ['Brakes', 'Springs', 'Front ARB', 'Rear ARB', 'Chassis Reinforcement', 'Weight Reduction'],
+    },
+    {
+      key: 'engine',
+      title: 'Engine',
+      sections: ['Engine'],
+      partOrder: [
+        'Intake',
+        'Fuel System',
+        'Ignition',
+        'Exhaust',
+        'Camshaft',
+        'Valves',
+        'Displacement',
+        'Pistons',
+        // forced induction controls (existing schema uses these exact names)
+        'Turbo',
+        'Twin Turbo',
+        'Supercharger',
+        'Centrifugal Supercharger',
+        'Intercooler',
+        'Oil Cooling',
+        'Flywheel',
+      ],
+    },
+  ];
+
+  function orderParts(partEntries: Array<[string, PartOption]>, partOrder: string[]) {
+    const orderIndex = new Map<string, number>();
+    partOrder.forEach((p, i) => orderIndex.set(p, i));
+    return [...partEntries].sort(([a], [b]) => {
+      const ai = orderIndex.has(a) ? orderIndex.get(a)! : Number.MAX_SAFE_INTEGER;
+      const bi = orderIndex.has(b) ? orderIndex.get(b)! : Number.MAX_SAFE_INTEGER;
+      if (ai !== bi) return ai - bi;
+      return a.localeCompare(b);
+    });
+  }
+
   const renderControl = (section: string, partName: string, partConfig: PartOption) => {
     const currentStyle = values[section]?.[partName] || '';
     const manufacturerKey = `${partName}-Manufacturer`;
@@ -325,20 +401,73 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
   return (
     <div className="parts-form">
-      {Object.entries(schema.sections).map(([sectionName, sectionData]) => (
-        <div key={sectionName} className="part-section">
-          <h3>{sectionName}</h3>
-          <div className="part-grid">
-            {Object.entries(sectionData.parts).map(([partName, partConfig]) => (
-              <div key={partName} className="part-control">
-                <label>{partName}</label>
-                {renderControl(sectionName, partName, partConfig)}
-                {partConfig.hint && <span className="hint">{partConfig.hint}</span>}
-              </div>
-            ))}
+      {ORDERED_SECTION_GROUPS.map((group) => {
+        // gather all parts from the sections in this group
+        const parts: Array<[string, PartOption, string]> = [];
+        for (const sec of group.sections) {
+          const secData = schema.sections?.[sec];
+          if (!secData) continue;
+          for (const [partName, partConfig] of Object.entries(secData.parts)) {
+            // explicitly omit Engine Swap until data exists
+            if (sec === 'Conversion' && partName === 'Engine Swap') continue;
+            parts.push([partName, partConfig, sec]);
+          }
+        }
+
+        if (!parts.length) return null;
+
+        // Order within group
+        const ordered = orderParts(
+          parts.map(([p, cfg]) => [p, cfg] as [string, PartOption]),
+          group.partOrder,
+        );
+
+        // Re-associate ordered part configs with their original section
+        const partToSection = new Map<string, string>();
+        const partToConfig = new Map<string, PartOption>();
+        for (const [p, cfg, sec] of parts) {
+          partToSection.set(p, sec);
+          partToConfig.set(p, cfg);
+        }
+
+        return (
+          <div key={group.key} className="part-section">
+            <h3>{group.title}</h3>
+            <div className="part-grid">
+              {ordered.map(([partName]) => {
+                const partConfig = partToConfig.get(partName);
+                const sectionName = partToSection.get(partName);
+                if (!partConfig || !sectionName) return null;
+                return (
+                  <div key={`${sectionName}::${partName}`} className="part-control">
+                    <label>{partName}</label>
+                    {renderControl(sectionName, partName, partConfig)}
+                    {partConfig.hint && <span className="hint">{partConfig.hint}</span>}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
+
+      {/* Render any remaining sections (e.g., Tuning) after ordered upgrade groups */}
+      {Object.entries(schema.sections)
+        .filter(([sectionName]) => !ORDERED_SECTION_GROUPS.some((g) => g.sections.includes(sectionName)))
+        .map(([sectionName, sectionData]) => (
+          <div key={sectionName} className="part-section">
+            <h3>{sectionName}</h3>
+            <div className="part-grid">
+              {Object.entries(sectionData.parts).map(([partName, partConfig]) => (
+                <div key={partName} className="part-control">
+                  <label>{partName}</label>
+                  {renderControl(sectionName, partName, partConfig)}
+                  {partConfig.hint && <span className="hint">{partConfig.hint}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
     </div>
   );
 }

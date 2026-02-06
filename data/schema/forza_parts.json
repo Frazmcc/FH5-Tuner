@@ -1,5 +1,27 @@
 {
   "sections": {
+    "Conversion": {
+      "parts": {
+        "Drivetrain Swap": {
+          "control": "dropdown",
+          "options": [
+            "Stock",
+            "RWD",
+            "AWD"
+          ]
+        },
+        "Aspiration": {
+          "control": "dropdown",
+          "options": [
+            "Stock",
+            "Turbo",
+            "Twin Turbo",
+            "Supercharger",
+            "Naturally Aspirated"
+          ]
+        }
+      }
+    },
     "Tires": {
       "parts": {
         "Front Compound": {
@@ -69,6 +91,15 @@
     "Aero": {
       "parts": {
         "Front Bumper": {
+          "control": "button",
+          "options": [
+            "Stock",
+            "Street",
+            "Sport",
+            "Race"
+          ]
+        },
+        "Rear Bumper": {
           "control": "button",
           "options": [
             "Stock",
