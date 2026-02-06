@@ -170,7 +170,6 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
             className="style-select"
           >
             <option value={STOCK_SENTINEL}>Stock</option>
-            <option value="">Select rim style</option>
             {FIXED_RIM_STYLES.filter((s) => s !== 'Stock').map((s) => (
               <option key={s} value={s}>
                 {s}
