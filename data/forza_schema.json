@@ -198,6 +198,26 @@
           "control": "text",
           "default": "0.80",
           "hint": "Enter gear 6 ratio"
+        },
+        "Gear 7 Ratio": {
+          "control": "text",
+          "default": "N/A",
+          "hint": "Enter gear 7 ratio, or N/A if not used"
+        },
+        "Gear 8 Ratio": {
+          "control": "text",
+          "default": "N/A",
+          "hint": "Enter gear 8 ratio, or N/A if not used"
+        },
+        "Gear 9 Ratio": {
+          "control": "text",
+          "default": "N/A",
+          "hint": "Enter gear 9 ratio, or N/A if not used"
+        },
+        "Gear 10 Ratio": {
+          "control": "text",
+          "default": "N/A",
+          "hint": "Enter gear 10 ratio, or N/A if not used"
         }
       }
     }

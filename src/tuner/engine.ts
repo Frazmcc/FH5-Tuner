@@ -748,10 +748,13 @@ export function calculateTune(
   for (let i = 1; i <= tune.gear_ratios.length; i++) {
     const key = `Gear ${i} Ratio`;
     const n = parseOptionalNumber(upgrades?.Tuning?.[key]);
-    if (n === null) break;
+    if (n === null) {
+      manualRatios.length = 0;
+      break;
+    }
     manualRatios.push(n);
   }
-  if (manualRatios.length >= 4) tune.gear_ratios = manualRatios;
+  if (manualRatios.length === tune.gear_ratios.length) tune.gear_ratios = manualRatios;
   
   // Apply upgrade modifiers
   if (upgrades.Platform?.Springs === 'Race') {
