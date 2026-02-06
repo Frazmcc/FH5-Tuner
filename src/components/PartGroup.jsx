@@ -9,6 +9,13 @@ function rimGet(v, ...keys) {
 
 const FIXED_RIM_STYLES = ['Stock', 'Sport', 'Multi-Piece', 'Specialised',];
 
+const STOCK_SENTINEL = '__STOCK__';
+
+function stripStock(options) {
+  if (!options || !options.length) return [];
+  return options.filter((o) => o && o !== 'Stock');
+}
+
 function normalizeToFixedStyle(raw) {
   if (!raw) return null;
   const s = String(raw).trim().toLowerCase();
@@ -87,9 +94,18 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
         <div className="rim-4-group">
           {/* Style */}
           <select
-            value={value}
+            value={value === '' || value === 'Stock' ? STOCK_SENTINEL : value}
             onChange={(e) => {
               const newStyle = e.target.value;
+              if (newStyle === STOCK_SENTINEL) {
+                onSelect(section, part, '');
+                onSelect(section, manufacturerKey, '');
+                onSelect(section, nameKey, '');
+                onSelect(section, sizeKey, '');
+                onSelect(section, combinedKey, '');
+                return;
+              }
+
               onSelect(section, part, newStyle);
               onSelect(section, manufacturerKey, '');
               onSelect(section, nameKey, '');
@@ -97,8 +113,9 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
               onSelect(section, combinedKey, '');
             }}
           >
+            <option value={STOCK_SENTINEL}>Stock</option>
             <option value="">Select Style</option>
-            {FIXED_RIM_STYLES.map((s) => (
+            {FIXED_RIM_STYLES.filter((s) => s !== 'Stock').map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -110,6 +127,14 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             value={currentManufacturer}
             onChange={(e) => {
               const m = e.target.value;
+              if (m === STOCK_SENTINEL) {
+                onSelect(section, part, '');
+                onSelect(section, manufacturerKey, '');
+                onSelect(section, nameKey, '');
+                onSelect(section, sizeKey, '');
+                onSelect(section, combinedKey, '');
+                return;
+              }
               onSelect(section, manufacturerKey, m);
               onSelect(section, nameKey, '');
               onSelect(section, sizeKey, '');
@@ -118,6 +143,7 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             disabled={!value}
             style={{ marginTop: 8 }}
           >
+            <option value={STOCK_SENTINEL}>Stock</option>
             <option value="">{value ? 'Select manufacturer...' : 'Select a style first'}</option>
             {manufacturersForStyle.map((m) => (
               <option key={m} value={m}>
@@ -131,6 +157,14 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             value={currentName}
             onChange={(e) => {
               const nm = e.target.value;
+              if (nm === STOCK_SENTINEL) {
+                onSelect(section, part, '');
+                onSelect(section, manufacturerKey, '');
+                onSelect(section, nameKey, '');
+                onSelect(section, sizeKey, '');
+                onSelect(section, combinedKey, '');
+                return;
+              }
               onSelect(section, nameKey, nm);
               onSelect(section, sizeKey, '');
               onSelect(section, combinedKey, '');
@@ -138,6 +172,7 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             disabled={!currentManufacturer}
             style={{ marginTop: 8 }}
           >
+            <option value={STOCK_SENTINEL}>Stock</option>
             <option value="">{currentManufacturer ? 'Select rim model...' : 'Select a manufacturer first'}</option>
             {namesForStyleManufacturer.map((nm) => (
               <option key={nm} value={nm}>
@@ -151,6 +186,14 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             value={currentSize}
             onChange={(e) => {
               const sz = e.target.value;
+              if (sz === STOCK_SENTINEL) {
+                onSelect(section, part, '');
+                onSelect(section, manufacturerKey, '');
+                onSelect(section, nameKey, '');
+                onSelect(section, sizeKey, '');
+                onSelect(section, combinedKey, '');
+                return;
+              }
               onSelect(section, sizeKey, sz);
               const man = selectedValues[manufacturerKey] || '';
               const nm = selectedValues[nameKey] || '';
@@ -159,6 +202,7 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
             disabled={!currentName}
             style={{ marginTop: 8 }}
           >
+            <option value={STOCK_SENTINEL}>Stock</option>
             <option value="">{currentName ? 'Select rim size...' : 'Select a rim model first'}</option>
             {sizesForSelection.map((sz) => (
               <option key={sz} value={sz}>
@@ -173,10 +217,16 @@ export default function PartGroup({ section, parts, selectedValues, onSelect, ri
     // non-rim controls (unchanged)
     if (partData.control === 'button' || partData.control === 'dropdown') {
       const v = selectedValues[part] || '';
+      const effectiveValue = v === '' || v === 'Stock' ? STOCK_SENTINEL : v;
+      const options = stripStock(partData.options);
       return (
-        <select value={v} onChange={(e) => onSelect(section, part, e.target.value)} className="part-select">
-          <option value="">Select Option</option>
-          {partData.options && partData.options.map((opt) => (
+        <select
+          value={effectiveValue}
+          onChange={(e) => onSelect(section, part, e.target.value === STOCK_SENTINEL ? 'Stock' : e.target.value)}
+          className="part-select"
+        >
+          <option value={STOCK_SENTINEL}>Stock</option>
+          {options.map((opt) => (
             <option key={opt} value={opt}>
               {opt}
             </option>
