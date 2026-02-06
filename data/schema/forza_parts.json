@@ -323,7 +323,6 @@
           "control": "button",
           "options": [
             "Stock",
-            "Street",
             "Sport",
             "Race"
           ]
