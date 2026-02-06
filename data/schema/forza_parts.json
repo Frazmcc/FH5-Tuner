@@ -306,12 +306,17 @@
           ]
         },
         "Transmission": {
-          "control": "button",
+          "control": "dropdown",
           "options": [
             "Stock",
-            "Street",
             "Sport",
-            "Race"
+            "Race",
+            "Race: 6 Speed",
+            "Race: 7 Speed",
+            "Race: 8 Speed",
+            "Race: 9 Speed",
+            "Race: 10 Speed",
+            "Drift: 4 Speed"
           ]
         },
         "Driveline": {
