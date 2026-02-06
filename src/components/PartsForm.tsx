@@ -80,7 +80,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
       title: 'Conversion',
       sections: ['Conversion'],
       // Engine Swap intentionally omitted for now
-      partOrder: ['Drivetrain Swap'],
+      partOrder: ['Drivetrain Swap', 'Aspiration'],
     },
     {
       key: 'aero',
@@ -411,7 +411,6 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
              // UI grouping rules:
              // - Show Aspiration under Engine (but it lives in Conversion in the schema)
-             if (group.key === 'conversion' && sec === 'Conversion' && partName === 'Aspiration') continue;
              if (group.key === 'engine' && sec === 'Conversion' && partName !== 'Aspiration') continue;
 
             parts.push([partName, partConfig, sec]);
