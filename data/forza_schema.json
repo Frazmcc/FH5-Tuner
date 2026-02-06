@@ -1,5 +1,17 @@
 {
   "sections": {
+    "Conversion": {
+      "parts": {
+        "Drivetrain Swap": {
+          "control": "dropdown",
+          "options": ["Stock", "RWD", "AWD"]
+        },
+        "Aspiration": {
+          "control": "dropdown",
+          "options": ["Stock", "Turbo", "Twin Turbo", "Supercharger", "Centrifugal Supercharger"]
+        }
+      }
+    },
     "Tires": {
       "parts": {
         "Front Compound": {
@@ -83,22 +95,6 @@
         "Pistons": {
           "control": "button",
           "options": ["Stock", "Street", "Sport", "Race"]
-        },
-        "Turbo": {
-          "control": "button",
-          "options": ["None", "Street", "Sport", "Race", "Rally"]
-        },
-        "Twin Turbo": {
-          "control": "button",
-          "options": ["None", "Street", "Sport", "Race"]
-        },
-        "Supercharger": {
-          "control": "button",
-          "options": ["None", "Street", "Sport", "Race"]
-        },
-        "Centrifugal Supercharger": {
-          "control": "button",
-          "options": ["None", "Street", "Sport", "Race"]
         },
         "Intercooler": {
           "control": "button",
