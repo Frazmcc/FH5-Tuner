@@ -80,7 +80,7 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
       title: 'Conversion',
       sections: ['Conversion'],
       // Engine Swap intentionally omitted for now
-      partOrder: ['Drivetrain Swap', 'Aspiration'],
+      partOrder: ['Drivetrain Swap'],
     },
     {
       key: 'aero',
@@ -117,8 +117,11 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
     {
       key: 'engine',
       title: 'Engine',
-      sections: ['Engine'],
+      // NOTE: Aspiration is defined under Conversion in the schema,
+      // but the UI should present it under Engine.
+      sections: ['Engine', 'Conversion'],
       partOrder: [
+        'Aspiration',
         'Intake',
         'Fuel System',
         'Ignition',
@@ -405,6 +408,12 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
           for (const [partName, partConfig] of Object.entries(secData.parts)) {
             // explicitly omit Engine Swap until data exists
             if (sec === 'Conversion' && partName === 'Engine Swap') continue;
+
+             // UI grouping rules:
+             // - Show Aspiration under Engine (but it lives in Conversion in the schema)
+             if (group.key === 'conversion' && sec === 'Conversion' && partName === 'Aspiration') continue;
+             if (group.key === 'engine' && sec === 'Conversion' && partName !== 'Aspiration') continue;
+
             parts.push([partName, partConfig, sec]);
           }
         }
