@@ -3,8 +3,6 @@ import CarPicker from '../components/CarPicker';
 import PartsForm from '../components/PartsForm';
 import { calculateTune, formatTuneForFH5, type Car, type TuneType, type WeatherPreset } from '../tuner/engine';
 
-// Import data
-import carsData from '../../data/schema/fh5_cars.json';
 import partsSchema from '../../data/schema/forza_parts.json';
 import rimsData from '../../data/fh5_rims.json';
 
@@ -78,9 +76,7 @@ export default function Calculator() {
         <div className="left-panel">
           <div className="config-section">
             <CarPicker
-              cars={carsData as Car[]}
-              selectedCar={selectedCar}
-              onSelectCar={setSelectedCar}
+              onSelect={setSelectedCar}
             />
           </div>
 
