@@ -332,9 +332,11 @@
           "control": "button",
           "options": [
             "Stock",
-            "Street",
             "Sport",
-            "Race"
+            "Race",
+            "Rally",
+            "Off-Road",
+            "Drift"
           ]
         }
       }
