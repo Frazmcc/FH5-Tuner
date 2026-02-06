@@ -275,3 +275,4 @@ Add new test cases to `tests/engine.test.ts` for:
 ## License
 
 MIT
+2026
