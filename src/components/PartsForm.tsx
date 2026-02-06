@@ -141,8 +141,8 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
 
     // Render the 4-select rim UI for Rims section
     const renderRimFourDropdowns = () => {
-      const isStock = currentStyle === 'Stock';
-      const effectiveStyleValue = currentStyle === 'Stock' ? STOCK_SENTINEL : currentStyle;
+      const isStock = !currentStyle || currentStyle === 'Stock';
+      const effectiveStyleValue = isStock ? STOCK_SENTINEL : currentStyle;
 
       return (
         <div className="rim-4-group">
@@ -211,65 +211,67 @@ export default function PartsForm({ schema, values, onValueChange, rims }: Parts
               </select>
 
               {/* Dropdown 3: Rim Name (filtered by style+manufacturer) */}
-              <select
-                value={currentName === 'Stock' ? STOCK_SENTINEL : currentName}
-                onChange={(e) => {
-                  const nm = e.target.value;
-                  if (nm === STOCK_SENTINEL) {
-                    onValueChange(section, partName, 'Stock');
-                    onValueChange(section, manufacturerKey, '');
-                    onValueChange(section, nameKey, '');
+              {!currentManufacturer ? null : (
+                <select
+                  value={currentName === 'Stock' ? STOCK_SENTINEL : currentName}
+                  onChange={(e) => {
+                    const nm = e.target.value;
+                    if (nm === STOCK_SENTINEL) {
+                      onValueChange(section, partName, 'Stock');
+                      onValueChange(section, manufacturerKey, '');
+                      onValueChange(section, nameKey, '');
+                      onValueChange(section, sizeKey, '');
+                      onValueChange(section, combinedKey, '');
+                      return;
+                    }
+                    onValueChange(section, nameKey, nm);
+                    // clear size and combined
                     onValueChange(section, sizeKey, '');
                     onValueChange(section, combinedKey, '');
-                    return;
-                  }
-                  onValueChange(section, nameKey, nm);
-                  // clear size and combined
-                  onValueChange(section, sizeKey, '');
-                  onValueChange(section, combinedKey, '');
-                }}
-                disabled={!currentManufacturer}
-                style={{ marginTop: 8 }}
-              >
-                <option value={STOCK_SENTINEL}>Stock</option>
-                <option value="">{currentManufacturer ? 'Select rim model...' : 'Select a manufacturer first'}</option>
-                {namesForStyleManufacturer.map((nm) => (
-                  <option key={nm} value={nm}>
-                    {nm}
-                  </option>
-                ))}
-              </select>
+                  }}
+                  style={{ marginTop: 8 }}
+                >
+                  <option value={STOCK_SENTINEL}>Stock</option>
+                  <option value="">Select rim model...</option>
+                  {namesForStyleManufacturer.map((nm) => (
+                    <option key={nm} value={nm}>
+                      {nm}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               {/* Dropdown 4: Rim Size (filtered by style+manufacturer+name) */}
-              <select
-                value={currentSize === 'Stock' ? STOCK_SENTINEL : currentSize}
-                onChange={(e) => {
-                  const sz = e.target.value;
-                  if (sz === STOCK_SENTINEL) {
-                    onValueChange(section, partName, 'Stock');
-                    onValueChange(section, manufacturerKey, '');
-                    onValueChange(section, nameKey, '');
-                    onValueChange(section, sizeKey, '');
-                    onValueChange(section, combinedKey, '');
-                    return;
-                  }
-                  onValueChange(section, sizeKey, sz);
-                  // update combined as manufacturer|||name|||size
-                  const man = values[section]?.[manufacturerKey] || '';
-                  const nm = values[section]?.[nameKey] || '';
-                  updateCombined(man, nm, sz);
-                }}
-                disabled={!currentName}
-                style={{ marginTop: 8 }}
-              >
-                <option value={STOCK_SENTINEL}>Stock</option>
-                <option value="">{currentName ? 'Select rim size...' : 'Select a rim model first'}</option>
-                {sizesForSelection.map((sz) => (
-                  <option key={sz} value={sz}>
-                    {sz}
-                  </option>
-                ))}
-              </select>
+              {!currentManufacturer || !currentName ? null : (
+                <select
+                  value={currentSize === 'Stock' ? STOCK_SENTINEL : currentSize}
+                  onChange={(e) => {
+                    const sz = e.target.value;
+                    if (sz === STOCK_SENTINEL) {
+                      onValueChange(section, partName, 'Stock');
+                      onValueChange(section, manufacturerKey, '');
+                      onValueChange(section, nameKey, '');
+                      onValueChange(section, sizeKey, '');
+                      onValueChange(section, combinedKey, '');
+                      return;
+                    }
+                    onValueChange(section, sizeKey, sz);
+                    // update combined as manufacturer|||name|||size
+                    const man = values[section]?.[manufacturerKey] || '';
+                    const nm = values[section]?.[nameKey] || '';
+                    updateCombined(man, nm, sz);
+                  }}
+                  style={{ marginTop: 8 }}
+                >
+                  <option value={STOCK_SENTINEL}>Stock</option>
+                  <option value="">Select rim size...</option>
+                  {sizesForSelection.map((sz) => (
+                    <option key={sz} value={sz}>
+                      {sz}
+                    </option>
+                  ))}
+                </select>
+              )}
             </>
           )}
         </div>
