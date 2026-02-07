@@ -37,8 +37,8 @@ interface PartsFormProps {
   rims?: RimEntry[]; // loaded from data/fh5_rims.json
 }
 
-// fixed styles (must match data/fh5_rims.json)
-const FIXED_RIM_STYLES = ['Sport', 'Racing', 'Offroad', 'Drag', 'Stock'] as const;
+// fixed styles
+const FIXED_RIM_STYLES = ['Sport', 'Multi-Piece', 'Specialised', 'Stock'] as const;
 type FixedStyle = typeof FIXED_RIM_STYLES[number];
 
 function rimGet(v: RimEntry, ...keys: string[]) {
@@ -53,9 +53,8 @@ function normalizeToFixedStyle(raw?: string | null): FixedStyle | null {
   const s = String(raw).trim().toLowerCase();
   if (!s) return null;
   if (s.includes('sport')) return 'Sport';
-  if (s.includes('rac')) return 'Racing';
-  if (s.includes('off')) return 'Offroad';
-  if (s.includes('drag')) return 'Drag';
+  if (s.includes('multi') || s.includes('split') || s.includes('piece')) return 'Multi-Piece';
+  if (s.includes('special') || s.includes('specialis') || s.includes('specializ')) return 'Specialised';
   if (s.includes('stock')) return 'Stock';
   for (const fs of FIXED_RIM_STYLES) {
     if (s === fs.toLowerCase()) return fs;
