@@ -23,11 +23,13 @@ interface RimEntry {
   Style?: string;
   Size?: string | number;
   Price?: string | number;
+  Weight?: string | number;
   manufacturer?: string;
   name?: string;
   style?: string;
   size?: string | number;
   price?: string | number;
+  weight?: string | number;
 }
 
 interface PartsFormProps {
@@ -37,7 +39,7 @@ interface PartsFormProps {
   rims?: RimEntry[]; // loaded from data/fh5_rims.json
 }
 
-// fixed styles
+// Rim styles shown in the app UI (FH5 categories)
 const FIXED_RIM_STYLES = ['Sport', 'Multi-Piece', 'Specialised', 'Stock'] as const;
 type FixedStyle = typeof FIXED_RIM_STYLES[number];
 
@@ -55,6 +57,11 @@ function normalizeToFixedStyle(raw?: string | null): FixedStyle | null {
   if (s.includes('sport')) return 'Sport';
   if (s.includes('multi') || s.includes('split') || s.includes('piece')) return 'Multi-Piece';
   if (s.includes('special') || s.includes('specialis') || s.includes('specializ')) return 'Specialised';
+
+  // Rim list data often uses more granular styles (e.g. Racing/Offroad/Drag).
+  // Bucket them into the 4 FH5 UI categories.
+  if (s.includes('racing') || s === 'race' || s.includes('track')) return 'Multi-Piece';
+  if (s.includes('offroad') || s.includes('off-road') || s.includes('off road') || s.includes('drag')) return 'Specialised';
   if (s.includes('stock')) return 'Stock';
   for (const fs of FIXED_RIM_STYLES) {
     if (s === fs.toLowerCase()) return fs;
