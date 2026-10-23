@@ -1,10 +1,9 @@
 name: Apply Patch and Create PR
-
 on:
   workflow_dispatch:
     inputs:
       patch_path:
-        description: 'Path to patch folder inside the repo (e.g. .github/patches/feature-tuner-prototype)'
+        description: 'Patch folder under .github/patches/'
         required: true
         default: '.github/patches/feature-tuner-prototype'
       branch_name:
@@ -14,59 +13,52 @@ on:
       pr_title:
         description: 'Pull request title'
         required: true
-        default: 'feat: add FH5 tuner prototype (CSV→JSON, CarPicker, scripts)'
+        default: 'feat: add FH5 tuner prototype'
       pr_body:
         description: 'Pull request body'
         required: true
-        default: 'Apply prepared patch: adds generated fh5_cars.json and CarPicker components.'
-
+        default: 'Apply prepared patch'
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   apply-patch:
     runs-on: ubuntu-latest
+    env:
+      PATCH_PATH: ${{ inputs.patch_path }}
+      BRANCH_NAME: ${{ inputs.branch_name }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Validate patch path
-        id: validate
+      - name: Validate dispatch inputs and apply patch without deleting repository files
+        shell: bash
         run: |
-          if [ ! -d "${{ github.workspace }}/${{ github.event.inputs.patch_path }}" ]; then
-            echo "::error::Patch path '${{ github.event.inputs.patch_path }}' not found in repository."
-            exit 1
+          set -euo pipefail
+          [[ "$PATCH_PATH" =~ ^\.github/patches/[A-Za-z0-9_./-]+$ ]] || { echo "::error::Invalid patch path"; exit 1; }
+          [[ "$BRANCH_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,100}$ ]] || { echo "::error::Invalid branch name"; exit 1; }
+          [[ "$BRANCH_NAME" != *..* && "$BRANCH_NAME" != */.git* && "$BRANCH_NAME" != *//*
+            && "$BRANCH_NAME" != */ && "$BRANCH_NAME" != *".lock" ]] || exit 1
+          git check-ref-format --branch "$BRANCH_NAME"
+          root="$(realpath -e "$GITHUB_WORKSPACE/.github/patches")"
+          candidate="$(realpath -e "$GITHUB_WORKSPACE/$PATCH_PATH")"
+          [[ -d "$candidate" && "$candidate" == "$root/"* ]] || { echo "::error::Patch escapes trusted folder"; exit 1; }
+          if find "$candidate" -type l -print -quit | grep -q .; then
+            echo "::error::Symbolic links not permitted in patch"; exit 1
           fi
-          echo "Patch path is present: ${{ github.event.inputs.patch_path }}"
-
-      - name: Copy patch contents to temporary folder
-        run: |
-          rm -rf /tmp/patch_apply || true
-          mkdir -p /tmp/patch_apply
-          cp -R "${{ github.workspace }}/${{ github.event.inputs.patch_path }}/." /tmp/patch_apply/
-
-      - name: Create branch for patch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git switch -c "${{ github.event.inputs.branch_name }}" || git checkout -b "${{ github.event.inputs.branch_name }}"
-
-      - name: Apply patch files into repo
-        run: |
-          # copy into repo root (overwrite)
-          rsync -av --delete /tmp/patch_apply/ "${{ github.workspace }}/"
+          git switch -c "$BRANCH_NAME"
+          cp -a "$candidate/." "$GITHUB_WORKSPACE/"
           git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit (patch already applied)."
-          else
-            git commit -m "Apply patch: ${{ github.event.inputs.patch_path }}"
-            git push --set-upstream origin "${{ github.event.inputs.branch_name }}"
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Apply validated prepared patch'
+            git push origin "$BRANCH_NAME"
           fi
-
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Apply patch: ${{ github.event.inputs.patch_path }}"
-          branch: ${{ github.event.inputs.branch_name }}
-          title: ${{ github.event.inputs.pr_title }}
-          body: ${{ github.event.inputs.pr_body }}
+          branch: ${{ inputs.branch_name }}
+          title: ${{ inputs.pr_title }}
+          body: ${{ inputs.pr_body }}
